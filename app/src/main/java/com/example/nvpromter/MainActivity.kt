@@ -3,17 +3,32 @@ package com.example.nvpromter
 import android.Manifest
 import android.content.pm.PackageManager
 import android.hardware.Camera
-import android.os.Build
+import android.icu.text.SimpleDateFormat
+import android.media.CamcorderProfile
+import android.media.MediaRecorder
+import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
+import android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE
+import android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO
+import android.util.Log
+import android.widget.Button
 import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import java.io.File
+import java.io.IOException
+import java.util.*
 
 
 private var mCamera: Camera? = null
 private var mPreview: CameraPreview? = null
 private val PERMISSION_REQUEST_CODE = 101;
 private val TAG = "Permission";
+private var bTnStatus :Boolean = true;
+private  var recorder = MediaRecorder() ;
+val MEDIA_TYPE_IMAGE = 1
+val MEDIA_TYPE_VIDEO = 2
 
 
 
@@ -24,7 +39,23 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         makeRequest();
 
-
+        // get reference to button
+        val btn_click = findViewById(R.id.button_capture) as Button
+        // set on-click listener
+        btn_click.setOnClickListener {
+            if (bTnStatus)
+            {
+                btn_click.text="Stop"
+                bTnStatus = false;
+                StartRecord()
+            }
+            else
+            {
+                btn_click.text="Capture"
+                bTnStatus = true;
+                StopRecord();
+            }
+        }
         // Create an instance of Camera
         mCamera = getCameraInstance()
 
@@ -66,6 +97,87 @@ class MainActivity : AppCompatActivity() {
             ),
             PERMISSION_REQUEST_CODE
         )
+    }
+
+    private fun StartRecord()
+    {
+        try {
+            mCamera?.unlock();
+            recorder.setCamera(mCamera)
+            recorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
+            recorder.setVideoSource(MediaRecorder.VideoSource.CAMERA)
+            recorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH))
+            recorder.setOutputFile(getOutputMediaFile(MEDIA_TYPE_VIDEO));
+            recorder.setPreviewDisplay(mPreview?.holder?.surface);
+        /*    recorder?.apply {
+                setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
+                setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT)
+                setVideoEncoder(MediaRecorder.VideoEncoder.DEFAULT)
+            }*/
+            recorder.prepare()
+            recorder.start()
+        }
+     catch (e: IllegalStateException) {
+        Log.d(TAG, "IllegalStateException preparing MediaRecorder: ${e.message}")
+        StopRecord()
+
+    } catch (e: IOException) {
+        Log.d(TAG, "IOException preparing MediaRecorder: ${e.message}")
+        StopRecord()
+
+    }
+
+    }
+
+    private fun StopRecord()
+    {
+        recorder.stop()
+        recorder.reset()
+        recorder.release()
+        mCamera?.lock();
+        mCamera?.stopPreview();
+        mCamera?.release()
+
+    }
+
+    /** Create a file Uri for saving an image or video */
+    private fun getOutputMediaFileUri(type: Int): Uri {
+        return Uri.fromFile(getOutputMediaFile(type))
+    }
+
+    /** Create a File for saving an image or video */
+    private fun getOutputMediaFile(type: Int): File? {
+        // To be safe, you should check that the SDCard is mounted
+        // using Environment.getExternalStorageState() before doing this.
+
+        val mediaStorageDir = File(
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),
+            "nPromter"
+        )
+        // This location works best if you want the created images to be shared
+        // between applications and persist after your app has been uninstalled.
+
+        // Create the storage directory if it does not exist
+        mediaStorageDir.apply {
+            if (!exists()) {
+                if (!mkdirs()) {
+                    Log.d("MyCameraApp", "failed to create directory")
+                    return null
+                }
+            }
+        }
+
+        // Create a media file name
+        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
+        return when (type) {
+            MEDIA_TYPE_IMAGE -> {
+                File("${mediaStorageDir.path}${File.separator}IMG_$timeStamp.jpg")
+            }
+            MEDIA_TYPE_VIDEO -> {
+                File("${mediaStorageDir.path}${File.separator}VID_$timeStamp.mp4")
+            }
+            else -> null
+        }
     }
 
     override fun onRequestPermissionsResult(
