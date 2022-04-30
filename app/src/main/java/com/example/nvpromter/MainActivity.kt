@@ -3,6 +3,7 @@ package com.example.nvpromter
 import android.Manifest
 import android.content.pm.PackageManager
 import android.hardware.Camera
+import android.hardware.Camera.CameraInfo
 import android.icu.text.SimpleDateFormat
 import android.media.CamcorderProfile
 import android.media.MediaRecorder
@@ -74,11 +75,23 @@ class MainActivity : AppCompatActivity() {
     /** A safe way to get an instance of the Camera object. */
     fun getCameraInstance(): Camera? {
         return try {
-            Camera.open() // attempt to get a Camera instance
+            Camera.open(getFrontCameraId()) // attempt to get a Camera instance
         } catch (e: Exception) {
             // Camera is not available (in use or does not exist)
             null // returns null if camera is unavailable
         }
+    }
+    fun getFrontCameraId(): Int {
+        var cameraCount = 0
+        val cameraInfo = CameraInfo()
+        cameraCount = Camera.getNumberOfCameras()
+        for (camIdx in 0 until cameraCount) {
+            Camera.getCameraInfo(camIdx, cameraInfo)
+            if (cameraInfo.facing == CameraInfo.CAMERA_FACING_FRONT) {
+                return camIdx
+            } /*from  w  ww  .j  a va2 s . c  o m*/
+        }
+        return -1
     }
 
     private fun makeRequest() {
@@ -91,7 +104,6 @@ class MainActivity : AppCompatActivity() {
             this,
             arrayOf(
                 Manifest.permission.CAMERA,
-                Manifest.permission.BLUETOOTH,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 Manifest.permission.RECORD_AUDIO
             ),
