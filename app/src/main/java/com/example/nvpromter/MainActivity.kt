@@ -30,6 +30,9 @@ private var bTnStatus :Boolean = true;
 private  var recorder = MediaRecorder() ;
 val MEDIA_TYPE_IMAGE = 1
 val MEDIA_TYPE_VIDEO = 2
+var cameraInfo :CameraInfo? = null;
+var cameraCount : Int = 0;
+var cameraIndex :  Int = 0;
 
 
 
@@ -39,6 +42,18 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         makeRequest();
+
+        cameraInfo = CameraInfo()
+        cameraCount = Camera.getNumberOfCameras()
+        val btn_camera = findViewById(R.id.CameraB) as Button
+        // set on-click listener
+        btn_camera.setOnClickListener {
+
+            if (cameraIndex== cameraCount+1) cameraIndex=0;
+            getCameratoPreview(cameraIndex);
+            cameraIndex += 1;
+
+        }
 
         // get reference to button
         val btn_click = findViewById(R.id.button_capture) as Button
@@ -57,8 +72,21 @@ class MainActivity : AppCompatActivity() {
                 StopRecord();
             }
         }
-        // Create an instance of Camera
-        mCamera = getCameraInstance()
+    }
+
+    /** A safe way to get an instance of the Camera object. */
+    fun getCameraInstance(cAmeraid:Int): Camera? {
+        return try {
+            Camera.open(cAmeraid) // attempt to get a Camera instance
+        } catch (e: Exception) {
+            // Camera is not available (in use or does not exist)
+            null // returns null if camera is unavailable
+        }
+    }
+    fun getCameratoPreview(id:Int) {
+        var cameraId = id
+
+        mCamera = getCameraInstance(cameraId)
 
         mPreview = mCamera?.let {
             // Create our Preview view
@@ -69,18 +97,10 @@ class MainActivity : AppCompatActivity() {
         mPreview?.also {
             val preview: FrameLayout = findViewById(R.id.camera_preview)
             preview.addView(it)
+
         }
     }
 
-    /** A safe way to get an instance of the Camera object. */
-    fun getCameraInstance(): Camera? {
-        return try {
-            Camera.open(getFrontCameraId()) // attempt to get a Camera instance
-        } catch (e: Exception) {
-            // Camera is not available (in use or does not exist)
-            null // returns null if camera is unavailable
-        }
-    }
     fun getFrontCameraId(): Int {
         var cameraCount = 0
         val cameraInfo = CameraInfo()
