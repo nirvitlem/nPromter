@@ -33,6 +33,8 @@ val MEDIA_TYPE_VIDEO = 2
 var cameraInfo :CameraInfo? = null;
 var cameraCount : Int = 0;
 var cameraIndex :  Int = 0;
+var preview: FrameLayout? = null;
+var CameraFront : Boolean =  false;
 
 
 
@@ -43,13 +45,14 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         makeRequest();
 
+        preview = findViewById(R.id.camera_preview)
         cameraInfo = CameraInfo()
         cameraCount = Camera.getNumberOfCameras()
         val btn_camera = findViewById(R.id.CameraB) as Button
         // set on-click listener
         btn_camera.setOnClickListener {
 
-            if (cameraIndex== cameraCount+1) cameraIndex=0;
+            if (cameraIndex== (cameraCount+1)) cameraIndex=0;
             getCameratoPreview(cameraIndex);
             cameraIndex += 1;
 
@@ -83,25 +86,30 @@ class MainActivity : AppCompatActivity() {
             null // returns null if camera is unavailable
         }
     }
-    fun getCameratoPreview(id:Int) {
-        var cameraId = id
+    private fun getCameratoPreview(cameraId:Int) {
 
         mCamera = getCameraInstance(cameraId)
+        Camera.getCameraInfo(cameraId, cameraInfo)
+        CameraFront = cameraInfo?.facing == CameraInfo.CAMERA_FACING_FRONT;
+        mCamera?.setDisplayOrientation(90)
+        Log.d(TAG, "getCameratoPreview  cameraId: ${cameraId}")
 
         mPreview = mCamera?.let {
             // Create our Preview view
+
             CameraPreview(this, it)
         }
 
         // Set the Preview view as the content of our activity.
         mPreview?.also {
-            val preview: FrameLayout = findViewById(R.id.camera_preview)
-            preview.addView(it)
+            preview?.removeView(it);
+
+            preview?.addView(it)
 
         }
     }
 
-    fun getFrontCameraId(): Int {
+    /*fun getFrontCameraId(): Int {
         var cameraCount = 0
         val cameraInfo = CameraInfo()
         cameraCount = Camera.getNumberOfCameras()
@@ -112,7 +120,7 @@ class MainActivity : AppCompatActivity() {
             } /*from  w  ww  .j  a va2 s . c  o m*/
         }
         return -1
-    }
+    }*/
 
     private fun makeRequest() {
         /*   ActivityCompat.requestPermissions(this,
@@ -138,7 +146,14 @@ class MainActivity : AppCompatActivity() {
             recorder.setCamera(mCamera)
             recorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
             recorder.setVideoSource(MediaRecorder.VideoSource.CAMERA)
-            recorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH))
+            recorder.setProfile(CamcorderProfile.get(cameraIndex))
+            if (!CameraFront) {
+                // Back
+                recorder.setOrientationHint(90);
+            } else {
+                // Front
+                recorder.setOrientationHint(270);
+            }
             recorder.setOutputFile(getOutputMediaFile(MEDIA_TYPE_VIDEO));
             recorder.setPreviewDisplay(mPreview?.holder?.surface);
         /*    recorder?.apply {
@@ -147,6 +162,7 @@ class MainActivity : AppCompatActivity() {
                 setVideoEncoder(MediaRecorder.VideoEncoder.DEFAULT)
             }*/
             recorder.prepare()
+           // Thread.sleep(1000)
             recorder.start()
         }
      catch (e: IllegalStateException) {
@@ -169,6 +185,7 @@ class MainActivity : AppCompatActivity() {
         mCamera?.lock();
         mCamera?.stopPreview();
         mCamera?.release()
+        getCameratoPreview(cameraIndex)
 
     }
 
