@@ -15,6 +15,7 @@ import android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO
 import android.util.Log
 import android.widget.Button
 import android.widget.FrameLayout
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import java.io.File
@@ -44,6 +45,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         makeRequest();
+
 
         preview = findViewById(R.id.camera_preview)
         cameraInfo = CameraInfo()
@@ -75,6 +77,8 @@ class MainActivity : AppCompatActivity() {
                 StopRecord();
             }
         }
+        val PText = findViewById(R.id.PtextView) as TextView
+        PText.isSelected=true;
     }
 
     /** A safe way to get an instance of the Camera object. */
@@ -86,6 +90,7 @@ class MainActivity : AppCompatActivity() {
             null // returns null if camera is unavailable
         }
     }
+
     private fun getCameratoPreview(cameraId:Int) {
 
         mCamera = getCameraInstance(cameraId)
@@ -156,13 +161,7 @@ class MainActivity : AppCompatActivity() {
             }
             recorder.setOutputFile(getOutputMediaFile(MEDIA_TYPE_VIDEO));
             recorder.setPreviewDisplay(mPreview?.holder?.surface);
-        /*    recorder?.apply {
-                setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
-                setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT)
-                setVideoEncoder(MediaRecorder.VideoEncoder.DEFAULT)
-            }*/
             recorder.prepare()
-           // Thread.sleep(1000)
             recorder.start()
         }
      catch (e: IllegalStateException) {
@@ -185,7 +184,7 @@ class MainActivity : AppCompatActivity() {
         mCamera?.lock();
         mCamera?.stopPreview();
         mCamera?.release()
-        getCameratoPreview(cameraIndex)
+
 
     }
 
