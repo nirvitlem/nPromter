@@ -77,8 +77,7 @@ class MainActivity : AppCompatActivity() {
                 StopRecord();
             }
         }
-        val PText = findViewById(R.id.PtextView) as TextView
-        PText.isSelected=true;
+
     }
 
     /** A safe way to get an instance of the Camera object. */
@@ -147,6 +146,8 @@ class MainActivity : AppCompatActivity() {
     private fun StartRecord()
     {
         try {
+            val PText = findViewById(R.id.PtextView) as TextView
+            PText.isSelected=true;
             mCamera?.unlock();
             recorder.setCamera(mCamera)
             recorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
