@@ -1,6 +1,7 @@
 package com.example.nvpromter
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.hardware.Camera
 import android.hardware.Camera.CameraInfo
@@ -8,8 +9,10 @@ import android.icu.text.SimpleDateFormat
 import android.media.CamcorderProfile
 import android.media.MediaRecorder
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.provider.AlarmClock.EXTRA_MESSAGE
 import android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE
 import android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO
 import android.util.Log
@@ -17,9 +20,11 @@ import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.app.ActivityCompat
 import java.io.File
 import java.io.IOException
+import java.lang.reflect.Field
 import java.util.*
 
 
@@ -76,6 +81,16 @@ class MainActivity : AppCompatActivity() {
                 bTnStatus = true;
                 StopRecord();
             }
+        }
+
+        // get reference to button
+        val btn_click_set_text = findViewById(R.id.SetText) as Button
+        // set on-click listener
+        btn_click_set_text.setOnClickListener {
+            val intent = Intent(this, SetTextActivity::class.java).apply {
+                //putExtra(EXTRA_MESSAGE, message)
+            }
+            startActivity(intent)
         }
 
     }
@@ -148,6 +163,7 @@ class MainActivity : AppCompatActivity() {
         try {
             val PText = findViewById(R.id.PtextView) as TextView
             PText.isSelected=true;
+            setMarqueeSpeed(PText, 10F)
             mCamera?.unlock();
             recorder.setCamera(mCamera)
             recorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
@@ -226,6 +242,36 @@ class MainActivity : AppCompatActivity() {
                 File("${mediaStorageDir.path}${File.separator}VID_$timeStamp.mp4")
             }
             else -> null
+        }
+    }
+
+    fun setMarqueeSpeed(tv: TextView?, speed: Float) {
+        if (tv != null) {
+            try {
+                var f: Field? = null
+                f = if (tv is AppCompatTextView) {
+                    tv.javaClass.superclass.getDeclaredField("mMarquee")
+                } else {
+                    tv.javaClass.getDeclaredField("mMarquee")
+                }
+                if (f != null) {
+                    f.setAccessible(true)
+                    val marquee: Any = f.get(tv)
+                    if (marquee != null) {
+                        var scrollSpeedFieldName = "mScrollUnit"
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                            scrollSpeedFieldName = "mPixelsPerSecond"
+                        }
+                        val mf: Field = marquee.javaClass.getDeclaredField(scrollSpeedFieldName)
+                        mf.setAccessible(true)
+                        mf.setFloat(marquee, speed)
+                    }
+                } else {
+                    Log.e("Marquee", "mMarquee object is null.")
+                }
+            } catch (e: java.lang.Exception) {
+                e.printStackTrace()
+            }
         }
     }
 
