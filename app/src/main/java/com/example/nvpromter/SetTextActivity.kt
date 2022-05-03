@@ -15,12 +15,6 @@ private var bTnStatus :Boolean = true;
 
 class SetTextActivity : AppCompatActivity() {
 
-    companion object {
-        @JvmStatic  var Speed: Float = 5.0f
-        @JvmStatic  var TimeBetweenLines: Int = 1;
-        @JvmStatic  var TimeToStart: Int= 2;
-        @JvmStatic  var TimeToEndCapture: Int= 2;
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,15 +36,23 @@ class SetTextActivity : AppCompatActivity() {
             {
                 btn_click.text="Preview"
                 bTnStatus = true;
-                StartPriview();
             }
+        }
+
+        // get reference to button
+        val btn_close = findViewById(R.id.BClose) as Button
+        // set on-click listener
+        btn_click.setOnClickListener {
+            finish();
         }
     }
 
     fun StartPriview()
     {
         val PText = findViewById(R.id.PvtextView) as ScrollTextView
-        PText.setTextColor(Color.BLACK);
+        PText.setText("abcdefghijklmopqrstvuwxyzabcdefghijklmopqrstvuwxyzabcdefghijklmopqrstvuwxyzabcdefghijklmopqrstvuwxyz")
+        PText.setSpeed(500f)
+        PText.setTextColor(Color.RED);
         PText?.startScroll();
     }
 

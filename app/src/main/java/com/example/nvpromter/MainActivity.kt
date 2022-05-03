@@ -43,10 +43,18 @@ var preview: FrameLayout? = null;
 var CameraFront : Boolean =  false;
 
 
-
-
 class MainActivity : AppCompatActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
+    companion object {
+        @JvmStatic
+        var Speed: Float = 5.0f
+        @JvmStatic
+        var TimeBetweenLines: Int = 1;
+        @JvmStatic
+        var TimeToStart: Int = 2;
+        @JvmStatic
+        var TimeToEndCapture: Int = 2;
+    }
+        override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         makeRequest();

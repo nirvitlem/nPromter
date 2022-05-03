@@ -48,6 +48,7 @@ class ScrollTextView   : androidx.appcompat.widget.AppCompatTextView {
 
     private var mScrollSpeed = 250f //Added speed for same scrolling speed regardless of text
 
+
     protected override fun onDetachedFromWindow() {
         removeGlobalListener()
         super.onDetachedFromWindow()
@@ -56,6 +57,11 @@ class ScrollTextView   : androidx.appcompat.widget.AppCompatTextView {
     fun setSpeed(mScrollSpeedValue : Float)
     {
         mScrollSpeed = mScrollSpeedValue
+    }
+
+    fun setText(mtextValue : String)
+    {
+        text = mtextValue
     }
 
     /**
