@@ -6,45 +6,46 @@
     android:layout_height="match_parent"
     tools:context=".SetTextActivity">
 
-    <TextView
+    <EditText
         android:id="@+id/textSetSpeed"
-        android:layout_width="70dp"
-        android:layout_height="19dp"
-        android:layout_marginStart="80dp"
-        android:layout_marginTop="40dp"
+        android:layout_width="97dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="36dp"
         android:ems="10"
         android:text="Speed"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
+    <EditText
         android:id="@+id/textSetTimeBetweenLines"
-        android:layout_width="70dp"
-        android:layout_height="19dp"
-        android:layout_marginTop="40dp"
+        android:layout_width="114dp"
+        android:layout_height="44dp"
+        android:layout_marginTop="36dp"
         android:ems="10"
         android:text="timeBLines"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.644"
         app:layout_constraintStart_toEndOf="@+id/textSetSpeed"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
+    <EditText
         android:id="@+id/TextSetStartTime"
-        android:layout_width="70dp"
-        android:layout_height="19dp"
-        android:layout_marginStart="80dp"
+        android:layout_width="127dp"
+        android:layout_height="41dp"
+        android:layout_marginStart="20dp"
         android:layout_marginTop="144dp"
         android:ems="10"
         android:text="StartAfetTime"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
+    <EditText
         android:id="@+id/TextSetSTopCapture"
-        android:layout_width="70dp"
-        android:layout_height="19dp"
+        android:layout_width="140dp"
+        android:layout_height="52dp"
         android:layout_marginStart="96dp"
-        android:layout_marginTop="84dp"
+        android:layout_marginTop="60dp"
         android:ems="10"
         android:text="StopCaptureAfter"
         app:layout_constraintEnd_toEndOf="parent"
@@ -56,17 +57,17 @@
         android:id="@+id/PvtextView"
         android:layout_width="match_parent"
         android:layout_height="32dp"
-        android:layout_marginBottom="228dp"
+        android:layout_marginTop="32dp"
         android:scrollHorizontally="true"
         android:singleLine="true"
         android:textDirection="ltr"
         android:textSize="24sp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/TextPad"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/Pbutton"
-        app:layout_constraintVertical_bias="0.664" />
+        app:layout_constraintVertical_bias="0.277" />
 
     <Button
         android:id="@+id/Pbutton"
@@ -82,10 +83,27 @@
         android:id="@+id/BClose"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="68dp"
+        android:layout_marginTop="56dp"
         android:text="Close"
         app:layout_constraintEnd_toStartOf="@+id/Pbutton"
-        app:layout_constraintHorizontal_bias="0.47"
+        app:layout_constraintHorizontal_bias="0.459"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/TextSetSTopCapture" />
+
+    <EditText
+        android:id="@+id/TextPad"
+        android:layout_width="398dp"
+        android:layout_height="375dp"
+        android:gravity="start"
+        android:isScrollContainer="true"
+        android:layoutDirection="ltr"
+        android:text="insert text here"
+        android:textAlignment="gravity"
+        android:textDirection="ltr"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.461"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.98" />
 </androidx.constraintlayout.widget.ConstraintLayout>
