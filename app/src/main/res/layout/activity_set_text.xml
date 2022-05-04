@@ -4,52 +4,56 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layoutDirection="ltr"
     tools:context=".SetTextActivity">
 
     <EditText
         android:id="@+id/textSetSpeed"
-        android:layout_width="97dp"
-        android:layout_height="45dp"
-        android:layout_marginStart="48dp"
+        android:layout_width="91dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="76dp"
         android:layout_marginTop="36dp"
         android:ems="10"
         android:text="Speed"
+        android:textSize="10sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
         android:id="@+id/textSetTimeBetweenLines"
-        android:layout_width="114dp"
-        android:layout_height="44dp"
-        android:layout_marginTop="36dp"
+        android:layout_width="91dp"
+        android:layout_height="41dp"
+        android:layout_marginTop="32dp"
         android:ems="10"
         android:text="timeBLines"
+        android:textSize="10sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.644"
+        app:layout_constraintHorizontal_bias="0.607"
         app:layout_constraintStart_toEndOf="@+id/textSetSpeed"
         app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
         android:id="@+id/TextSetStartTime"
-        android:layout_width="127dp"
-        android:layout_height="41dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="144dp"
+        android:layout_width="91dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="76dp"
+        android:layout_marginTop="140dp"
         android:ems="10"
         android:text="StartAfetTime"
+        android:textSize="10sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
         android:id="@+id/TextSetSTopCapture"
-        android:layout_width="140dp"
-        android:layout_height="52dp"
-        android:layout_marginStart="96dp"
-        android:layout_marginTop="60dp"
+        android:layout_width="91dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="64dp"
         android:ems="10"
         android:text="StopCaptureAfter"
+        android:textSize="10sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_bias="0.612"
         app:layout_constraintStart_toEndOf="@+id/TextSetStartTime"
         app:layout_constraintTop_toBottomOf="@+id/textSetTimeBetweenLines" />
 
@@ -67,39 +71,42 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/Pbutton"
-        app:layout_constraintVertical_bias="0.277" />
+        app:layout_constraintVertical_bias="0.0" />
 
     <Button
         android:id="@+id/Pbutton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="91dp"
+        android:layout_height="40dp"
         android:layout_marginTop="64dp"
-        android:layout_marginEnd="68dp"
+        android:layout_marginEnd="56dp"
         android:text="Priview"
+        android:textSize="10sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/TextSetStartTime" />
 
     <Button
         android:id="@+id/BClose"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="56dp"
+        android:layout_width="91dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="64dp"
         android:text="Close"
+        android:textSize="10sp"
         app:layout_constraintEnd_toStartOf="@+id/Pbutton"
-        app:layout_constraintHorizontal_bias="0.459"
+        app:layout_constraintHorizontal_bias="0.439"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/TextSetSTopCapture" />
 
     <EditText
         android:id="@+id/TextPad"
-        android:layout_width="398dp"
-        android:layout_height="375dp"
+        android:layout_width="382dp"
+        android:layout_height="344dp"
         android:gravity="start"
         android:isScrollContainer="true"
         android:layoutDirection="ltr"
         android:text="insert text here"
         android:textAlignment="gravity"
         android:textDirection="ltr"
+        android:textSize="12sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.461"

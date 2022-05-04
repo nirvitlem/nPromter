@@ -4,16 +4,18 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layoutDirection="ltr"
     tools:context=".MainActivity">
 
     <Button
         android:id="@+id/CameraB"
-        android:layout_width="wrap_content"
-        android:layout_height="48dp"
+        android:layout_width="91dp"
+        android:layout_height="40dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="16dp"
         android:text="@string/camera"
+        android:textSize="10sp"
         app:layout_constraintEnd_toStartOf="@+id/button_capture"
         app:layout_constraintHorizontal_bias="0.056"
         app:layout_constraintStart_toStartOf="parent"
@@ -21,12 +23,13 @@
 
     <Button
         android:id="@+id/SetText"
-        android:layout_width="wrap_content"
-        android:layout_height="48dp"
+        android:layout_width="91dp"
+        android:layout_height="40dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="16dp"
         android:text="@string/settext"
+        android:textSize="10sp"
         app:layout_constraintBottom_toTopOf="@+id/PtextView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.108"
@@ -36,11 +39,12 @@
 
     <Button
         android:id="@+id/button_capture"
-        android:layout_width="wrap_content"
-        android:layout_height="48dp"
+        android:layout_width="91dp"
+        android:layout_height="40dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         android:text="@string/capture"
+        android:textSize="10sp"
         app:layout_constraintBottom_toTopOf="@+id/PtextView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/SetText"
@@ -49,7 +53,7 @@
 
     <TextView
         android:id="@+id/PtextView"
-        android:layout_width="match_parent"
+        android:layout_width="411dp"
         android:layout_height="32dp"
         android:layout_marginTop="8dp"
         android:ellipsize="marquee"

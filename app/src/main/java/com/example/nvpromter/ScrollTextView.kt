@@ -39,7 +39,7 @@ class ScrollTextView   : androidx.appcompat.widget.AppCompatTextView {
 
     // scrolling feature
     private var mSlr: Scroller? = null
-
+    private var TextList:MutableList<String> = ArrayList()
     // the X offset when paused
     private var mXPaused = 0
 
@@ -47,6 +47,7 @@ class ScrollTextView   : androidx.appcompat.widget.AppCompatTextView {
     private var mPaused = true
 
     private var mScrollSpeed = 250f //Added speed for same scrolling speed regardless of text
+    private var BTLTime :Int = 0;
 
 
     protected override fun onDetachedFromWindow() {
@@ -59,6 +60,11 @@ class ScrollTextView   : androidx.appcompat.widget.AppCompatTextView {
         mScrollSpeed = mScrollSpeedValue
     }
 
+    fun setTimeBTLines(TimeBTLines : Int)
+    {
+        BTLTime = TimeBTLines
+    }
+
     fun setText(mtextValue : String)
     {
         text = mtextValue
@@ -68,17 +74,20 @@ class ScrollTextView   : androidx.appcompat.widget.AppCompatTextView {
      * begin to scroll the text from the original position
      */
     fun startScroll() {
-        val needsScrolling: Boolean = checkIfNeedsScrolling()
-        // begin from the middle
-        mXPaused = -1 * (width / 2)
-        // assume it's paused
-        mPaused = true
-        if (needsScrolling) {
-            resumeScroll()
-        } else {
-            pauseScroll()
+        splitTexttoLines()
+        for (Line in TextList) {
+            val needsScrolling: Boolean = checkIfNeedsScrolling(Line.toString())
+            // begin from the middle
+            mXPaused = -1 * (width / 2)
+            // assume it's paused
+            mPaused = true
+            if (needsScrolling) {
+                resumeScroll(Line.toString())
+            } else {
+                pauseScroll()
+            }
+            removeGlobalListener()
         }
-        removeGlobalListener()
     }
 
     /**
@@ -100,23 +109,24 @@ class ScrollTextView   : androidx.appcompat.widget.AppCompatTextView {
      * Waiting for layout to initiate
      */
     private var onGlobalLayoutListener: OnGlobalLayoutListener? =
-        OnGlobalLayoutListener { startScroll() }
+        OnGlobalLayoutListener { //startScroll()
+             }
 
     /**
      * Checking if we need scrolling
      */
-    private fun checkIfNeedsScrolling(): Boolean {
+    private fun checkIfNeedsScrolling(Line:String): Boolean {
         measure(0, 0)
         val textViewWidth = width
         if (textViewWidth == 0) return false
-        val textWidth = getTextLength().toFloat()
+        val textWidth = getTextLength(Line).toFloat()
         return textWidth > textViewWidth
     }
 
     /**
      * resume the scroll from the pausing point
      */
-    fun resumeScroll() {
+    fun resumeScroll(Line:String) {
         if (!mPaused) return
 
         // Do not know why it would not scroll sometimes
@@ -126,7 +136,7 @@ class ScrollTextView   : androidx.appcompat.widget.AppCompatTextView {
         // use LinearInterpolator for steady scrolling
         mSlr = Scroller(this.context, LinearInterpolator())
         setScroller(mSlr)
-        val scrollingLen = calculateScrollingLen()
+        val scrollingLen = calculateScrollingLen(Line)
         val distance = scrollingLen - (width + mXPaused)
         val duration = (1000f * distance / mScrollSpeed).toInt()
         visibility = VISIBLE
@@ -140,15 +150,27 @@ class ScrollTextView   : androidx.appcompat.widget.AppCompatTextView {
      *
      * @return the scrolling length in pixels
      */
-    private fun calculateScrollingLen(): Int {
-        val length = getTextLength()
+    private fun calculateScrollingLen(Line:String): Int {
+        val length = getTextLength(Line)
         return length + width
     }
 
-    private fun getTextLength(): Int {
+    /**
+     * calculate the lines  of the text
+     *
+     * @return the scrolling length in pixels
+     */
+    private fun splitTexttoLines()  {
+
+        for(line in text.toString().split("\n")) {
+            TextList.add(line.toString())
+        }
+    }
+
+    private fun getTextLength(Line:String): Int {
         val tp: TextPaint = paint
         var rect: Rect? = Rect()
-        val strTxt: String = text.toString()
+        val strTxt: String = Line.toString()
         tp.getTextBounds(strTxt, 0, strTxt.length, rect)
         val length: Int = rect!!.width()
         rect = null

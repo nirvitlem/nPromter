@@ -45,7 +45,8 @@ class SetTextActivity : AppCompatActivity() {
             {
                 btn_click.text="Preview"
                 bTnStatus = true;
-                PText=null;
+                PText!!.pauseScroll();
+                PText=null
             }
         }
 
@@ -61,38 +62,11 @@ class SetTextActivity : AppCompatActivity() {
     {
         PText = findViewById(R.id.PvtextView) as ScrollTextView
         PText!!.setText(TextToshow?.text)
-        PText!!.setSpeed(TextSpeed.toString().toFloat())
+        PText!!.setSpeed(TextSpeed?.text.toString().toFloat())
+        PText!!.setTimeBTLines(TextTospeedbtl?.text.toString().toInt())
         PText!!.setTextColor(Color.RED);
         PText?.startScroll();
     }
 
-    fun setMarqueeSpeed(tv: TextView?, speed: Float) {
-        if (tv != null) {
-            try {
-                var f: Field? = null
-                f = if (tv is AppCompatTextView) {
-                    tv.javaClass.superclass.getDeclaredField("mMarquee")
-                } else {
-                    tv.javaClass.getDeclaredField("mMarquee")
-                }
-                if (f != null) {
-                    f.setAccessible(true)
-                    val marquee: Any = f.get(tv)
-                    if (marquee != null) {
-                        var scrollSpeedFieldName = "mScrollUnit"
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                            scrollSpeedFieldName = "mPixelsPerSecond"
-                        }
-                        val mf: Field = marquee.javaClass.getDeclaredField(scrollSpeedFieldName)
-                        mf.setAccessible(true)
-                        mf.setFloat(marquee, speed)
-                    }
-                } else {
-                    Log.e("Marquee", "mMarquee object is null.")
-                }
-            } catch (e: java.lang.Exception) {
-                e.printStackTrace()
-            }
-        }
-    }
+
 }
