@@ -17,12 +17,14 @@ class ScrollTextView   : androidx.appcompat.widget.AppCompatTextView {
     {
         setSingleLine()
         ellipsize = null
+        marqueeRepeatLimit=1;
         visibility = VISIBLE
         viewTreeObserver.addOnGlobalLayoutListener(onGlobalLayoutListener) //added listener check
     }
     constructor(context: Context?, attrs: AttributeSet?): super (context!!, attrs )
     {
         setSingleLine()
+        marqueeRepeatLimit=1;
         ellipsize = null
         visibility = VISIBLE
         viewTreeObserver.addOnGlobalLayoutListener(onGlobalLayoutListener) //added listener check
@@ -30,6 +32,7 @@ class ScrollTextView   : androidx.appcompat.widget.AppCompatTextView {
     constructor(context: Context?, attrs: AttributeSet?, defStyle: Int):super(context!!,attrs,defStyle)
     {
         setSingleLine()
+        marqueeRepeatLimit=1;
         ellipsize = null
         visibility = VISIBLE
         viewTreeObserver.addOnGlobalLayoutListener(onGlobalLayoutListener) //added listener check
@@ -138,6 +141,7 @@ class ScrollTextView   : androidx.appcompat.widget.AppCompatTextView {
         setScroller(mSlr)
         val scrollingLen = calculateScrollingLen(Line)
         val distance = scrollingLen - (width + mXPaused)
+        //check distance for next line
         val duration = (1000f * distance / mScrollSpeed).toInt()
         visibility = VISIBLE
         mSlr!!.startScroll(mXPaused, 0, distance, 0, duration)
