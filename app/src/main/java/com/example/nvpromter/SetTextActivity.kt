@@ -60,8 +60,10 @@ class SetTextActivity : AppCompatActivity() {
 
     fun StartPriview()
     {
+
+
         PText = findViewById(R.id.PvtextView) as ScrollTextView
-        PText!!.setText(TextToshow?.text)
+        PText!!.setTextToShow(TextToshow?.text.toString())
       //  PText!!.setSpeed(TextSpeed?.text.toString().toFloat())
       //  PText!!.setTimeBTLines(TextTospeedbtl?.text.toString().toInt())
         PText!!.setTextColor(Color.RED);
