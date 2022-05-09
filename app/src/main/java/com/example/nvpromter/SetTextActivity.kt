@@ -62,8 +62,8 @@ class SetTextActivity : AppCompatActivity() {
     {
         PText = findViewById(R.id.PvtextView) as ScrollTextView
         PText!!.setText(TextToshow?.text)
-        PText!!.setSpeed(TextSpeed?.text.toString().toFloat())
-        PText!!.setTimeBTLines(TextTospeedbtl?.text.toString().toInt())
+      //  PText!!.setSpeed(TextSpeed?.text.toString().toFloat())
+      //  PText!!.setTimeBTLines(TextTospeedbtl?.text.toString().toInt())
         PText!!.setTextColor(Color.RED);
         PText?.startScroll();
     }

@@ -201,8 +201,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun StopRecord()
-    {
+    private fun StopRecord()    {
         recorder.stop()
         recorder.reset()
         recorder.release()
@@ -283,10 +282,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>, grantResults: IntArray
-    ) {
+    override fun onRequestPermissionsResult(       requestCode: Int,        permissions: Array<String>, grantResults: IntArray    ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         when (requestCode) {
             PERMISSION_REQUEST_CODE -> {
