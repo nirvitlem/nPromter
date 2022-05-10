@@ -3,6 +3,7 @@ package com.example.nvpromter
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.hardware.Camera
 import android.hardware.Camera.CameraInfo
 import android.icu.text.SimpleDateFormat
@@ -53,7 +54,7 @@ class MainActivity : AppCompatActivity() {
             setContentView(R.layout.activity_main)
             makeRequest();
 
-            PMText = findViewById<ScrollTextView>(R.id.PtextView)
+
             preview = findViewById(R.id.camera_preview)
             cameraInfo = CameraInfo()
             cameraCount = Camera.getNumberOfCameras()
@@ -72,7 +73,6 @@ class MainActivity : AppCompatActivity() {
             // set on-click listener
             btn_click.setOnClickListener {
                 if (bTnStatus) {
-                    PMText=ScrollTextViewObject
                     btn_click.text = "Stop"
                     bTnStatus = false;
                     StartRecord()
@@ -164,6 +164,9 @@ class MainActivity : AppCompatActivity() {
             //val PText = findViewById(R.id.PtextView) as TextView
             //PText.isSelected=true;
             //setMarqueeSpeed(PText, 10F)
+            PMText = findViewById<ScrollTextView>(R.id.PtextView)
+            PMText!!.setTextToShow(ScrollTextViewObject?.text.toString())
+            PMText!!.setTextColor(Color.RED);
             PMText?.startScroll();
             mCamera?.unlock();
             recorder.setCamera(mCamera)

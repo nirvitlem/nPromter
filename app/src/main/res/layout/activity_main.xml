@@ -53,10 +53,9 @@
 
     <com.example.nvpromter.ScrollTextView
         android:id="@+id/PtextView"
-        android:layout_width="411dp"
+        android:layout_width="match_parent"
         android:layout_height="32dp"
         android:layout_marginTop="8dp"
-        android:ellipsize="marquee"
         android:singleLine="true"
         android:textDirection="ltr"
         android:textSize="24sp"
@@ -66,7 +65,8 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/CameraB"
-        app:layout_constraintVertical_bias="0.053"/>
+        app:layout_constraintVertical_bias="0.053"
+        tools:visibility="visible" />
 
 
     <FrameLayout
