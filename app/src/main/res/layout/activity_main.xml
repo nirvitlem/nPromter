@@ -51,16 +51,13 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0" />
 
-    <TextView
+    <com.example.nvpromter.ScrollTextView
         android:id="@+id/PtextView"
         android:layout_width="411dp"
         android:layout_height="32dp"
         android:layout_marginTop="8dp"
         android:ellipsize="marquee"
-        android:marqueeRepeatLimit="marquee_forever"
-        android:scrollHorizontally="true"
         android:singleLine="true"
-        android:text="@string/abcdefghijklmopqrstvuwxyzabcdefghijklmopqrstvuwxyzabcdefghijklmopqrstvuwxyzabcdefghijklmopqrstvuwxyz"
         android:textDirection="ltr"
         android:textSize="24sp"
         android:textStyle="bold"
@@ -69,7 +66,8 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/CameraB"
-        app:layout_constraintVertical_bias="0.053" />
+        app:layout_constraintVertical_bias="0.053"/>
+
 
     <FrameLayout
         android:id="@+id/camera_preview"

@@ -12,7 +12,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
-import android.provider.AlarmClock.EXTRA_MESSAGE
 import android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE
 import android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO
 import android.util.Log
@@ -41,67 +40,60 @@ var cameraCount : Int = 0;
 var cameraIndex :  Int = 0;
 var preview: FrameLayout? = null;
 var CameraFront : Boolean =  false;
+private var PMText: ScrollTextView? = null;
 
 
 class MainActivity : AppCompatActivity() {
     companion object {
         @JvmStatic
-        var Speed: Float = 5.0f
-        @JvmStatic
-        var TimeBetweenLines: Int = 1;
-        @JvmStatic
-        var TimeToStart: Int = 2;
-        @JvmStatic
-        var TimeToEndCapture: Int = 2;
+        var ScrollTextViewObject: ScrollTextView? = null
     }
         override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        makeRequest();
+            super.onCreate(savedInstanceState)
+            setContentView(R.layout.activity_main)
+            makeRequest();
 
+            PMText = findViewById<ScrollTextView>(R.id.PtextView)
+            preview = findViewById(R.id.camera_preview)
+            cameraInfo = CameraInfo()
+            cameraCount = Camera.getNumberOfCameras()
+            val btn_camera = findViewById(R.id.CameraB) as Button
+            // set on-click listener
+            btn_camera.setOnClickListener {
 
-        preview = findViewById(R.id.camera_preview)
-        cameraInfo = CameraInfo()
-        cameraCount = Camera.getNumberOfCameras()
-        val btn_camera = findViewById(R.id.CameraB) as Button
-        // set on-click listener
-        btn_camera.setOnClickListener {
+                if (cameraIndex == (cameraCount + 1)) cameraIndex = 0;
+                getCameratoPreview(cameraIndex);
+                cameraIndex += 1;
 
-            if (cameraIndex== (cameraCount+1)) cameraIndex=0;
-            getCameratoPreview(cameraIndex);
-            cameraIndex += 1;
+            }
+
+            // get reference to button
+            val btn_click = findViewById(R.id.button_capture) as Button
+            // set on-click listener
+            btn_click.setOnClickListener {
+                if (bTnStatus) {
+                    PMText=ScrollTextViewObject
+                    btn_click.text = "Stop"
+                    bTnStatus = false;
+                    StartRecord()
+                } else {
+                    btn_click.text = "Capture"
+                    bTnStatus = true;
+                    StopRecord();
+                }
+            }
+
+            // get reference to button
+            val btn_click_set_text = findViewById(R.id.SetText) as Button
+            // set on-click listener
+            btn_click_set_text.setOnClickListener {
+                val intent = Intent(this, SetTextActivity::class.java).apply {
+                    //putExtra(EXTRA_MESSAGE, message)
+                }
+                startActivity(intent)
+            }
 
         }
-
-        // get reference to button
-        val btn_click = findViewById(R.id.button_capture) as Button
-        // set on-click listener
-        btn_click.setOnClickListener {
-            if (bTnStatus)
-            {
-                btn_click.text="Stop"
-                bTnStatus = false;
-                StartRecord()
-            }
-            else
-            {
-                btn_click.text="Capture"
-                bTnStatus = true;
-                StopRecord();
-            }
-        }
-
-        // get reference to button
-        val btn_click_set_text = findViewById(R.id.SetText) as Button
-        // set on-click listener
-        btn_click_set_text.setOnClickListener {
-            val intent = Intent(this, SetTextActivity::class.java).apply {
-                //putExtra(EXTRA_MESSAGE, message)
-            }
-            startActivity(intent)
-        }
-
-    }
 
     /** A safe way to get an instance of the Camera object. */
     fun getCameraInstance(cAmeraid:Int): Camera? {
@@ -169,9 +161,10 @@ class MainActivity : AppCompatActivity() {
     private fun StartRecord()
     {
         try {
-            val PText = findViewById(R.id.PtextView) as TextView
-            PText.isSelected=true;
-            setMarqueeSpeed(PText, 10F)
+            //val PText = findViewById(R.id.PtextView) as TextView
+            //PText.isSelected=true;
+            //setMarqueeSpeed(PText, 10F)
+            PMText?.startScroll();
             mCamera?.unlock();
             recorder.setCamera(mCamera)
             recorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
@@ -205,11 +198,9 @@ class MainActivity : AppCompatActivity() {
         recorder.stop()
         recorder.reset()
         recorder.release()
-        mCamera?.lock();
-        mCamera?.stopPreview();
+        mCamera?.lock()
+        mCamera?.stopPreview()
         mCamera?.release()
-
-
     }
 
     /** Create a file Uri for saving an image or video */
@@ -252,7 +243,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun setMarqueeSpeed(tv: TextView?, speed: Float) {
+  /*  fun setMarqueeSpeed(tv: TextView?, speed: Float) {
         if (tv != null) {
             try {
                 var f: Field? = null
@@ -280,7 +271,7 @@ class MainActivity : AppCompatActivity() {
                 e.printStackTrace()
             }
         }
-    }
+    }*/
 
     override fun onRequestPermissionsResult(       requestCode: Int,        permissions: Array<String>, grantResults: IntArray    ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)

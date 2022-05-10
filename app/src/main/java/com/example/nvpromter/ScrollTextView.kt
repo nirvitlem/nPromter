@@ -13,6 +13,10 @@ import android.widget.Scroller
 
 
 class ScrollTextView   : androidx.appcompat.widget.AppCompatTextView {
+    companion object {
+        @JvmStatic
+        var WaitTime : Int= 2000
+    }
 
     constructor (context: Context) :super(context)
     {
@@ -52,7 +56,8 @@ class ScrollTextView   : androidx.appcompat.widget.AppCompatTextView {
 
 
     private var mScrollSpeed = 250f //Added speed for same scrolling speed regardless of text
-    private var BTLTime :Int = 0
+    private var BTLTime :Int = 2000
+
 
 
     override fun onDetachedFromWindow() {
@@ -63,6 +68,11 @@ class ScrollTextView   : androidx.appcompat.widget.AppCompatTextView {
     fun setSpeed(mScrollSpeedValue : Float)
     {
         mScrollSpeed = mScrollSpeedValue
+    }
+
+    fun setPauseStartTime(TextSetStartTime : Int)
+    {
+        WaitTime = TextSetStartTime
     }
 
     fun setTimeBTLines(TimeBTLines : Int)
@@ -82,21 +92,24 @@ class ScrollTextView   : androidx.appcompat.widget.AppCompatTextView {
      * begin to scroll the text from the original position to specfic text
      */
     fun startScroll() {
+        Thread.sleep(WaitTime.toLong())
         this.text=TextList[LineIndex].toString();
         Log.d("startScroll-TextList[LineIndex",TextList[LineIndex].toString())
         Log.d("startScroll-LineIndex",LineIndex.toString())
         val needsScrolling: Boolean = checkIfNeedsScrolling(TextList[LineIndex].toString())
         // begin from the middle
-        mXPaused = -1 * (width / 2)
+        mXPaused = 1 //* (width / 2)
         // assume it's paused
         mPaused = true
-       // if (needsScrolling) {
+        if (needsScrolling) {
             Log.d("startScroll-needsScrolling",needsScrolling.toString())
             resumeScroll()
-     //   } else {
-     //       Log.d("startScroll-needsScrolling",needsScrolling.toString())
-     //       pauseScroll()
-     //   }
+        } else {
+           Log.d("startScroll-needsScrolling",needsScrolling.toString())
+           Thread.sleep(BTLTime.toLong())
+           resumeScroll()
+        //pauseScroll()
+        }
         removeGlobalListener()
 
     }
@@ -216,12 +229,15 @@ class ScrollTextView   : androidx.appcompat.widget.AppCompatTextView {
             if(LineIndex!=TextList.size) {
                 LineIndex++
                 Log.d("computeScroll-LineIndex", LineIndex.toString())
+                startScroll()
             }
             else
             {
+                mPaused=true
+                pauseScroll()
                 LineIndex=0
             }
-            startScroll()
+
 
         }
     }
