@@ -1,46 +1,54 @@
 package com.example.nvpromter
 
 import android.Manifest
+import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.graphics.ImageFormat
+import android.graphics.SurfaceTexture
 import android.hardware.Camera
 import android.hardware.Camera.CameraInfo
+import android.hardware.camera2.*
+import android.hardware.camera2.params.StreamConfigurationMap
 import android.icu.text.SimpleDateFormat
 import android.media.CamcorderProfile
+import android.media.Image
+import android.media.ImageReader
 import android.media.MediaRecorder
 import android.net.Uri
-import android.os.Build
-import android.os.Bundle
-import android.os.Environment
+import android.os.*
 import android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE
 import android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO
+import android.provider.Settings
 import android.util.Log
+import android.util.Size
+import android.util.SparseIntArray
+import android.view.Surface
+import android.view.TextureView
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import java.io.File
 import java.io.IOException
 import java.lang.reflect.Field
 import java.util.*
 
+const val CAMERA_REQUEST_RESULT = 101
 
-private var mCamera: Camera? = null
-private var mPreview: CameraPreview? = null
 private val PERMISSION_REQUEST_CODE = 101;
 private val TAG = "Permission";
 private var bTnStatus :Boolean = true;
-private  var recorder = MediaRecorder() ;
-val MEDIA_TYPE_IMAGE = 1
-val MEDIA_TYPE_VIDEO = 2
-var cameraInfo :CameraInfo? = null;
+private var runningBackgroundThread : Boolean =false;
+
 var cameraCount : Int = 0;
 var cameraIndex :  Int = 0;
-var preview: FrameLayout? = null;
-var CameraFront : Boolean =  false;
 private var PMText: ScrollTextView? = null;
 
 
@@ -49,37 +57,73 @@ class MainActivity : AppCompatActivity() {
         @JvmStatic
         var ScrollTextViewObject: ScrollTextView? = null
     }
+
+    private lateinit var textureView: TextureView
+    private lateinit var backgroundHandlerThread: HandlerThread
+    private lateinit var backgroundHandler: Handler
+    private lateinit var cameraManager: CameraManager
+    private lateinit var cameraDevice: CameraDevice
+    private lateinit var captureRequestBuilder: CaptureRequest.Builder
+    private lateinit var cameraCaptureSession: CameraCaptureSession
+    private lateinit var imageReader: ImageReader
+    private lateinit var previewSize: Size
+    private lateinit var videoSize: Size
+    private var shouldProceedWithOnResume: Boolean = true
+    private var orientations : SparseIntArray = SparseIntArray(4).apply {
+        append(Surface.ROTATION_0, 0)
+        append(Surface.ROTATION_90, 90)
+        append(Surface.ROTATION_180, 180)
+        append(Surface.ROTATION_270, 270)
+    }
+
+    private lateinit var mediaRecorder: MediaRecorder
+    private var isRecording: Boolean = false
+
+
         override fun onCreate(savedInstanceState: Bundle?) {
             super.onCreate(savedInstanceState)
             setContentView(R.layout.activity_main)
             makeRequest();
 
 
-            preview = findViewById(R.id.camera_preview)
-            cameraInfo = CameraInfo()
-            cameraCount = Camera.getNumberOfCameras()
-            val btn_camera = findViewById(R.id.CameraB) as Button
+            textureView = findViewById<TextureView>(R.id.tVcamera_preview)
+            cameraManager = getSystemService(Context.CAMERA_SERVICE) as CameraManager
+            cameraCount= cameraManager.cameraIdList.size
+
+            val btn_camera = findViewById<Button>(R.id.CameraB)
             // set on-click listener
             btn_camera.setOnClickListener {
 
                 if (cameraIndex == (cameraCount + 1)) cameraIndex = 0;
-                getCameratoPreview(cameraIndex);
+                if (runningBackgroundThread) {
+                   // stopBackgroundThread()
+                    setupCamera()
+                    connectCamera()
+                  //  startBackgroundThread()
+                } else {
+                    setupCamera()
+                    connectCamera()
+                   // startBackgroundThread()
+                }
                 cameraIndex += 1;
 
             }
 
             // get reference to button
-            val btn_click = findViewById(R.id.button_capture) as Button
+            val btn_click = findViewById<Button>(R.id.button_capture)
             // set on-click listener
             btn_click.setOnClickListener {
                 if (bTnStatus) {
                     btn_click.text = "Stop"
                     bTnStatus = false;
-                    StartRecord()
+                    mediaRecorder = MediaRecorder()
+                    setupMediaRecorder()
+                    startRecording()
                 } else {
                     btn_click.text = "Capture"
                     bTnStatus = true;
-                    StopRecord();
+                    mediaRecorder.stop()
+                    mediaRecorder.reset()
                 }
             }
 
@@ -92,61 +136,15 @@ class MainActivity : AppCompatActivity() {
                 }
                 startActivity(intent)
             }
-
+            if (!wasCameraPermissionWasGiven()) {
+               requestPermissions(arrayOf(Manifest.permission.CAMERA), CAMERA_REQUEST_RESULT)
+            }
         }
 
-    /** A safe way to get an instance of the Camera object. */
-    fun getCameraInstance(cAmeraid:Int): Camera? {
-        return try {
-            Camera.open(cAmeraid) // attempt to get a Camera instance
-        } catch (e: Exception) {
-            // Camera is not available (in use or does not exist)
-            null // returns null if camera is unavailable
-        }
-    }
 
-    private fun getCameratoPreview(cameraId:Int) {
-
-        mCamera = getCameraInstance(cameraId)
-        Camera.getCameraInfo(cameraId, cameraInfo)
-        CameraFront = cameraInfo?.facing == CameraInfo.CAMERA_FACING_FRONT;
-        mCamera?.setDisplayOrientation(90)
-        Log.d(TAG, "getCameratoPreview  cameraId: ${cameraId}")
-
-        mPreview = mCamera?.let {
-            // Create our Preview view
-
-            CameraPreview(this, it)
-        }
-
-        // Set the Preview view as the content of our activity.
-        mPreview?.also {
-            preview?.removeView(it);
-
-            preview?.addView(it)
-
-        }
-    }
-
-    /*fun getFrontCameraId(): Int {
-        var cameraCount = 0
-        val cameraInfo = CameraInfo()
-        cameraCount = Camera.getNumberOfCameras()
-        for (camIdx in 0 until cameraCount) {
-            Camera.getCameraInfo(camIdx, cameraInfo)
-            if (cameraInfo.facing == CameraInfo.CAMERA_FACING_FRONT) {
-                return camIdx
-            } /*from  w  ww  .j  a va2 s . c  o m*/
-        }
-        return -1
-    }*/
 
     private fun makeRequest() {
-        /*   ActivityCompat.requestPermissions(this,
-               arrayOf(Manifest.permission.BLUETOOTH_PRIVILEGED,Manifest.permission.BLUETOOTH_ADMIN,Manifest.permission.BLUETOOTH,Manifest.permission.ACCESS_COARSE_LOCATION,Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_WIFI_STATE
-               ,Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE),
-               PERMISSION_REQUEST_CODE
-           )*/
+
         ActivityCompat.requestPermissions(
             this,
             arrayOf(
@@ -158,72 +156,254 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    private fun StartRecord()
-    {
-        try {
-            //val PText = findViewById(R.id.PtextView) as TextView
-            //PText.isSelected=true;
-            //setMarqueeSpeed(PText, 10F)
-            PMText = findViewById<ScrollTextView>(R.id.PtextView)
-            PMText!!.setTextToShow(ScrollTextViewObject?.text.toString())
-            PMText!!.setTextColor(Color.RED);
-            PMText?.startScroll();
-            mCamera?.unlock();
-            recorder.setCamera(mCamera)
-            recorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
-            recorder.setVideoSource(MediaRecorder.VideoSource.CAMERA)
-            recorder.setProfile(CamcorderProfile.get(cameraIndex))
-            if (!CameraFront) {
-                // Back
-                recorder.setOrientationHint(90);
-            } else {
-                // Front
-                recorder.setOrientationHint(270);
-            }
-            recorder.setOutputFile(getOutputMediaFile(MEDIA_TYPE_VIDEO));
-            recorder.setPreviewDisplay(mPreview?.holder?.surface);
-            recorder.prepare()
-            recorder.start()
+
+    @SuppressLint("MissingPermission")
+    override fun onResume() {
+        super.onResume()
+        startBackgroundThread()
+        if (textureView.isAvailable && shouldProceedWithOnResume) {
+            setupCamera()
+        } else if (!textureView.isAvailable){
+            textureView.surfaceTextureListener = surfaceTextureListener
         }
-     catch (e: IllegalStateException) {
-        Log.d(TAG, "IllegalStateException preparing MediaRecorder: ${e.message}")
-        StopRecord()
-
-    } catch (e: IOException) {
-        Log.d(TAG, "IOException preparing MediaRecorder: ${e.message}")
-        StopRecord()
-
+        shouldProceedWithOnResume = !shouldProceedWithOnResume
     }
 
+    private fun setupCamera() {
+        Log.d("setupCamera-cameraIndex",cameraIndex.toString())
+       // val cameraIds: Array<String> = cameraManager.cameraIdList
+
+       // for (id in cameraIds) {
+            val cameraCharacteristics = cameraManager.getCameraCharacteristics(cameraIndex.toString())
+
+            //If we want to choose the rear facing camera instead of the front facing one
+          //  if (cameraCharacteristics.get(CameraCharacteristics.LENS_FACING) == CameraCharacteristics.LENS_FACING_FRONT) {
+         //       continue
+         //   }
+
+            val streamConfigurationMap : StreamConfigurationMap? = cameraCharacteristics.get(
+                CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
+
+            if (streamConfigurationMap != null) {
+                previewSize = cameraCharacteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)!!.getOutputSizes(
+                    ImageFormat.JPEG).maxByOrNull { it.height * it.width }!!
+                videoSize = cameraCharacteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)!!.getOutputSizes(MediaRecorder::class.java).maxByOrNull { it.height * it.width }!!
+                imageReader = ImageReader.newInstance(previewSize.width, previewSize.height, ImageFormat.JPEG, 1)
+                imageReader.setOnImageAvailableListener(onImageAvailableListener, backgroundHandler)
+        //    }
+        }
     }
 
-    private fun StopRecord()    {
-        recorder.stop()
-        recorder.reset()
-        recorder.release()
-        mCamera?.lock()
-        mCamera?.stopPreview()
-        mCamera?.release()
+    private fun takePhoto() {
+        captureRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE)
+        captureRequestBuilder.addTarget(imageReader.surface)
+        val rotation = windowManager.defaultDisplay.rotation
+        captureRequestBuilder.set(CaptureRequest.JPEG_ORIENTATION, orientations.get(rotation))
+        cameraCaptureSession.capture(captureRequestBuilder.build(), captureCallback, null)
     }
 
-    /** Create a file Uri for saving an image or video */
-    private fun getOutputMediaFileUri(type: Int): Uri {
-        return Uri.fromFile(getOutputMediaFile(type))
+    @SuppressLint("MissingPermission")
+    private fun connectCamera() {
+        cameraManager.openCamera(cameraIndex.toString(), cameraStateCallback, backgroundHandler)
     }
 
-    /** Create a File for saving an image or video */
-    private fun getOutputMediaFile(type: Int): File? {
-        // To be safe, you should check that the SDCard is mounted
-        // using Environment.getExternalStorageState() before doing this.
+    private fun setupMediaRecorder() {
+        mediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE)
+        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
+        mediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264)
+        mediaRecorder.setVideoSize(videoSize.width, videoSize.height)
+        mediaRecorder.setVideoFrameRate(30)
+        mediaRecorder.setOutputFile(createFile()?.absolutePath)
+        mediaRecorder.setVideoEncodingBitRate(10_000_000)
+        mediaRecorder.prepare()
+    }
 
+    private fun startRecording() {
+        val surfaceTexture : SurfaceTexture? = textureView.surfaceTexture
+        surfaceTexture?.setDefaultBufferSize(previewSize.width, previewSize.height)
+        val previewSurface: Surface = Surface(surfaceTexture)
+        val recordingSurface = mediaRecorder.surface
+
+        /*  PMText = findViewById<ScrollTextView>(R.id.PtextView)
+               PMText!!.setTextToShow(ScrollTextViewObject?.text.toString())
+               PMText!!.setTextColor(Color.RED);
+               PMText?.startScroll();*/
+
+        captureRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_RECORD)
+        captureRequestBuilder.addTarget(previewSurface)
+        captureRequestBuilder.addTarget(recordingSurface)
+
+        cameraDevice.createCaptureSession(listOf(previewSurface, recordingSurface), captureStateVideoCallback, backgroundHandler)
+    }
+
+    /**
+     * Surface Texture Listener
+     */
+
+    private val surfaceTextureListener = object : TextureView.SurfaceTextureListener {
+        @SuppressLint("MissingPermission")
+        override fun onSurfaceTextureAvailable(texture: SurfaceTexture, width: Int, height: Int) {
+            if (wasCameraPermissionWasGiven()) {
+                setupCamera()
+                connectCamera()
+            }
+        }
+
+        override fun onSurfaceTextureSizeChanged(texture: SurfaceTexture, width: Int, height: Int) {
+
+        }
+
+        override fun onSurfaceTextureDestroyed(texture: SurfaceTexture): Boolean {
+            return true
+        }
+
+        override fun onSurfaceTextureUpdated(texture: SurfaceTexture) {
+
+        }
+    }
+
+    /**
+     * Camera State Callbacks
+     */
+
+    private val cameraStateCallback = object : CameraDevice.StateCallback() {
+        override fun onOpened(camera: CameraDevice) {
+            cameraDevice = camera
+            val surfaceTexture : SurfaceTexture? = textureView.surfaceTexture
+            surfaceTexture?.setDefaultBufferSize(previewSize.width, previewSize.height)
+            val previewSurface: Surface = Surface(surfaceTexture)
+
+            captureRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
+            captureRequestBuilder.addTarget(previewSurface)
+
+            cameraDevice.createCaptureSession(listOf(previewSurface, imageReader.surface), captureStateCallback, null)
+        }
+
+        override fun onDisconnected(cameraDevice: CameraDevice) {
+
+        }
+
+        override fun onError(cameraDevice: CameraDevice, error: Int) {
+            val errorMsg = when(error) {
+                ERROR_CAMERA_DEVICE -> "Fatal (device)"
+                ERROR_CAMERA_DISABLED -> "Device policy"
+                ERROR_CAMERA_IN_USE -> "Camera in use"
+                ERROR_CAMERA_SERVICE -> "Fatal (service)"
+                ERROR_MAX_CAMERAS_IN_USE -> "Maximum cameras in use"
+                else -> "Unknown"
+            }
+            Log.e(TAG, "Error when trying to connect camera $errorMsg")
+        }
+    }
+
+    /**
+     * Background Thread
+     */
+    private fun startBackgroundThread() {
+        Log.d("startBackgroundThread-cameraIndex",cameraIndex.toString())
+        runningBackgroundThread = true;
+        backgroundHandlerThread = HandlerThread("CameraVideoThread")
+        backgroundHandlerThread.start()
+        backgroundHandler = Handler(backgroundHandlerThread.looper)
+    }
+
+    private fun stopBackgroundThread() {
+        Log.d("stopBackgroundThread-cameraIndex",cameraIndex.toString())
+        runningBackgroundThread = false
+        backgroundHandlerThread.quitSafely()
+        backgroundHandlerThread.join()
+    }
+
+    /**
+     * Capture State Callback
+     */
+
+    private val captureStateCallback = object : CameraCaptureSession.StateCallback() {
+        override fun onConfigureFailed(session: CameraCaptureSession) {
+
+        }
+        override fun onConfigured(session: CameraCaptureSession) {
+            cameraCaptureSession = session
+
+            cameraCaptureSession.setRepeatingRequest(
+                captureRequestBuilder.build(),
+                null,
+                backgroundHandler
+            )
+        }
+    }
+
+    private val captureStateVideoCallback = object : CameraCaptureSession.StateCallback() {
+        override fun onConfigureFailed(session: CameraCaptureSession) {
+            Log.e(TAG, "Configuration failed")
+        }
+        override fun onConfigured(session: CameraCaptureSession) {
+            cameraCaptureSession = session
+            captureRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureResult.CONTROL_AF_MODE_CONTINUOUS_VIDEO)
+            try {
+                cameraCaptureSession.setRepeatingRequest(
+                    captureRequestBuilder.build(), null,
+                    backgroundHandler
+                )
+                mediaRecorder.start()
+            } catch (e: CameraAccessException) {
+                e.printStackTrace()
+                Log.e(TAG, "Failed to start camera preview because it couldn't access the camera")
+            } catch (e: IllegalStateException) {
+                e.printStackTrace()
+            }
+
+        }
+    }
+
+    /**
+     * Capture Callback
+     */
+    private val captureCallback = object : CameraCaptureSession.CaptureCallback() {
+
+        override fun onCaptureStarted(
+            session: CameraCaptureSession,
+            request: CaptureRequest,
+            timestamp: Long,
+            frameNumber: Long
+        ) {}
+
+        override fun onCaptureProgressed(
+            session: CameraCaptureSession,
+            request: CaptureRequest,
+            partialResult: CaptureResult
+        ) { }
+
+        override fun onCaptureCompleted(
+            session: CameraCaptureSession,
+            request: CaptureRequest,
+            result: TotalCaptureResult
+        ) {
+
+        }
+    }
+
+    /**
+     * ImageAvailable Listener
+     */
+    val onImageAvailableListener = object: ImageReader.OnImageAvailableListener{
+        override fun onImageAvailable(reader: ImageReader) {
+            Toast.makeText(this@MainActivity, "Photo Taken!", Toast.LENGTH_SHORT).show()
+            val image: Image = reader.acquireLatestImage()
+            image.close()
+        }
+    }
+
+    /**
+     * File Creation
+     */
+
+    private fun createFile(): File? {
+        val sdf = java.text.SimpleDateFormat("yyyy_MM_dd_HH_mm_ss_SSS", Locale.US)
         val mediaStorageDir = File(
             Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),
             "nPromter"
         )
-        // This location works best if you want the created images to be shared
-        // between applications and persist after your app has been uninstalled.
-
-        // Create the storage directory if it does not exist
         mediaStorageDir.apply {
             if (!exists()) {
                 if (!mkdirs()) {
@@ -232,51 +412,27 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-
-        // Create a media file name
         val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
-        return when (type) {
-            MEDIA_TYPE_IMAGE -> {
-                File("${mediaStorageDir.path}${File.separator}IMG_$timeStamp.jpg")
-            }
-            MEDIA_TYPE_VIDEO -> {
-                File("${mediaStorageDir.path}${File.separator}VID_$timeStamp.mp4")
-            }
-            else -> null
-        }
+        return  File("${mediaStorageDir.path}${File.separator}VID_$timeStamp.mp4")
     }
 
-  /*  fun setMarqueeSpeed(tv: TextView?, speed: Float) {
-        if (tv != null) {
-            try {
-                var f: Field? = null
-                f = if (tv is AppCompatTextView) {
-                    tv.javaClass.superclass.getDeclaredField("mMarquee")
-                } else {
-                    tv.javaClass.getDeclaredField("mMarquee")
-                }
-                if (f != null) {
-                    f.setAccessible(true)
-                    val marquee: Any = f.get(tv)
-                    if (marquee != null) {
-                        var scrollSpeedFieldName = "mScrollUnit"
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                            scrollSpeedFieldName = "mPixelsPerSecond"
-                        }
-                        val mf: Field = marquee.javaClass.getDeclaredField(scrollSpeedFieldName)
-                        mf.setAccessible(true)
-                        mf.setFloat(marquee, speed)
-                    }
-                } else {
-                    Log.e("Marquee", "mMarquee object is null.")
-                }
-            } catch (e: java.lang.Exception) {
-                e.printStackTrace()
-            }
+    private fun wasCameraPermissionWasGiven() : Boolean {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED)
+        {
+            return true
         }
-    }*/
 
-    override fun onRequestPermissionsResult(       requestCode: Int,        permissions: Array<String>, grantResults: IntArray    ) {
+        return false
+    }
+    /** Create a file Uri for saving an image or video */
+
+
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         when (requestCode) {
             PERMISSION_REQUEST_CODE -> {

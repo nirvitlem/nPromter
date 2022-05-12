@@ -7,55 +7,60 @@
     android:layoutDirection="ltr"
     tools:context=".MainActivity">
 
+    <TextureView
+        android:id="@+id/tVcamera_preview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
     <Button
         android:id="@+id/CameraB"
         android:layout_width="91dp"
         android:layout_height="40dp"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
         android:layout_marginEnd="16dp"
         android:text="@string/camera"
         android:textSize="10sp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/button_capture"
-        app:layout_constraintHorizontal_bias="0.056"
+        app:layout_constraintHorizontal_bias="0.155"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.023" />
 
     <Button
         android:id="@+id/SetText"
         android:layout_width="91dp"
         android:layout_height="40dp"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
         android:layout_marginEnd="16dp"
         android:text="@string/settext"
         android:textSize="10sp"
-        app:layout_constraintBottom_toTopOf="@+id/PtextView"
+        app:layout_constraintBottom_toBottomOf="@+id/tVcamera_preview"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.108"
+        app:layout_constraintHorizontal_bias="0.064"
         app:layout_constraintStart_toEndOf="@+id/CameraB"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintVertical_bias="0.023" />
 
     <Button
         android:id="@+id/button_capture"
         android:layout_width="91dp"
         android:layout_height="40dp"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
         android:text="@string/capture"
         android:textSize="10sp"
-        app:layout_constraintBottom_toTopOf="@+id/PtextView"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.122"
         app:layout_constraintStart_toEndOf="@+id/SetText"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintVertical_bias="0.023" />
 
     <com.example.nvpromter.ScrollTextView
         android:id="@+id/PtextView"
         android:layout_width="match_parent"
         android:layout_height="32dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="24dp"
         android:singleLine="true"
         android:textDirection="ltr"
         android:textSize="24sp"
@@ -68,17 +73,5 @@
         app:layout_constraintVertical_bias="0.053"
         tools:visibility="visible" />
 
-
-    <FrameLayout
-        android:id="@+id/camera_preview"
-        android:layout_width="410dp"
-        android:layout_height="579dp"
-        android:layout_marginTop="24dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/PtextView">
-
-    </FrameLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
