@@ -16,11 +16,13 @@ class ScrollTextView   : androidx.appcompat.widget.AppCompatTextView {
     companion object {
         @JvmStatic
         var WaitTime : Int= 2000
+        var mPaused : Boolean= true
     }
 
     constructor (context: Context) :super(context)
     {
         setSingleLine()
+        LineIndex = 0
         ellipsize = null
         marqueeRepeatLimit=1
         visibility = VISIBLE
@@ -29,6 +31,7 @@ class ScrollTextView   : androidx.appcompat.widget.AppCompatTextView {
     constructor(context: Context?, attrs: AttributeSet?): super (context!!, attrs )
     {
         setSingleLine()
+        LineIndex = 0
         marqueeRepeatLimit=1
         ellipsize = null
         visibility = VISIBLE
@@ -37,6 +40,7 @@ class ScrollTextView   : androidx.appcompat.widget.AppCompatTextView {
     constructor(context: Context?, attrs: AttributeSet?, defStyle: Int):super(context!!,attrs,defStyle)
     {
         setSingleLine()
+        LineIndex = 0
         marqueeRepeatLimit=1
         ellipsize = null
         visibility = VISIBLE
@@ -52,7 +56,7 @@ class ScrollTextView   : androidx.appcompat.widget.AppCompatTextView {
     private var mXPaused = 0
 
     // whether it's being paused
-    private var mPaused = true
+
 
 
     private var mScrollSpeed = 250f //Added speed for same scrolling speed regardless of text
@@ -92,25 +96,31 @@ class ScrollTextView   : androidx.appcompat.widget.AppCompatTextView {
      * begin to scroll the text from the original position to specfic text
      */
     fun startScroll() {
-        Thread.sleep(WaitTime.toLong())
-        this.text=TextList[LineIndex].toString();
-        Log.d("startScroll-TextList[LineIndex",TextList[LineIndex].toString())
-        Log.d("startScroll-LineIndex",LineIndex.toString())
-        val needsScrolling: Boolean = checkIfNeedsScrolling(TextList[LineIndex].toString())
-        // begin from the middle
-        mXPaused = 1 //* (width / 2)
-        // assume it's paused
-        mPaused = true
-        if (needsScrolling) {
-            Log.d("startScroll-needsScrolling",needsScrolling.toString())
-            resumeScroll()
-        } else {
-           Log.d("startScroll-needsScrolling",needsScrolling.toString())
-           Thread.sleep(BTLTime.toLong())
-           resumeScroll()
-        //pauseScroll()
+        try {
+            Thread.sleep(WaitTime.toLong())
+            this.text = TextList[LineIndex].toString();
+            Log.d("startScroll-TextList[LineIndex", TextList[LineIndex].toString())
+            Log.d("startScroll-LineIndex", LineIndex.toString())
+            val needsScrolling: Boolean = checkIfNeedsScrolling(TextList[LineIndex].toString())
+            // begin from the middle
+            mXPaused = 1 * (width / 2)
+            // assume it's paused
+            mPaused = true
+            if (needsScrolling) {
+                Log.d("startScroll-needsScrolling", needsScrolling.toString())
+                resumeScroll()
+            } else {
+                Log.d("startScroll-needsScrolling", needsScrolling.toString())
+                Thread.sleep(BTLTime.toLong())
+                resumeScroll()
+                //pauseScroll()
+            }
+            removeGlobalListener()
         }
-        removeGlobalListener()
+        catch (exc: Exception)
+        {
+            Log.d("startScroll-Exception", exc.message.toString())
+            return}
 
     }
 
@@ -226,14 +236,14 @@ class ScrollTextView   : androidx.appcompat.widget.AppCompatTextView {
         super.computeScroll()
         if (null == mSlr) return
         if (mSlr!!.isFinished && !mPaused) {
-            if(LineIndex!=TextList.size) {
+            if(LineIndex<TextList.size) {
                 LineIndex++
                 Log.d("computeScroll-LineIndex", LineIndex.toString())
                 startScroll()
             }
             else
             {
-                mPaused=true
+                mPaused=false
                 pauseScroll()
                 LineIndex=0
             }

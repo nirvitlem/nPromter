@@ -11,7 +11,6 @@ import android.graphics.SurfaceTexture
 import android.hardware.camera2.*
 import android.hardware.camera2.params.StreamConfigurationMap
 import android.icu.text.SimpleDateFormat
-import android.media.CamcorderProfile
 import android.media.Image
 import android.media.ImageReader
 import android.media.MediaRecorder
@@ -26,8 +25,11 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.util.*
+import kotlin.concurrent.thread
+
 
 const val CAMERA_REQUEST_RESULT = 101
 
@@ -56,7 +58,7 @@ private var orientations : SparseIntArray = SparseIntArray(4).apply {
     append(Surface.ROTATION_180, 180)
     append(Surface.ROTATION_270, 270)
 }
-
+private var btn_click : Button?= null
 var cameraCount : Int = 0;
 var cameraIndex :  Int = 0;
 private var PMText: ScrollTextView? = null;
@@ -94,18 +96,16 @@ class MainActivity : AppCompatActivity() {
                 cameraIndex += 1;
 
             }
-            // get reference to button
-            val btn_click = findViewById<Button>(R.id.button_capture)
-            // set on-click listener
-            btn_click.setOnClickListener {
+            btn_click = findViewById<Button>(R.id.button_capture)
+            btn_click?.setOnClickListener {
                 if (bTnStatus) {
-                    btn_click.text = "Stop"
+                    btn_click?.text = "Stop"
                     bTnStatus = false;
                     mediaRecorder = MediaRecorder()
                     setupMediaRecorder()
                     startRecording()
                 } else {
-                    btn_click.text = "Capture"
+                    btn_click?.text = "Capture"
                     bTnStatus = true;
                     mediaRecorder.stop()
                     mediaRecorder.reset()
@@ -233,15 +233,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startRecording() {
+
         val surfaceTexture: SurfaceTexture? = textureView!!.surfaceTexture
         surfaceTexture?.setDefaultBufferSize(previewSize!!.width, previewSize!!.height)
         val previewSurface: Surface = Surface(surfaceTexture)
         val recordingSurface = mediaRecorder.surface
 
-       /* PMText = findViewById<ScrollTextView>(R.id.PtextView)
-        PMText!!.setTextToShow(ScrollTextViewObject?.text.toString())
-        PMText!!.setTextColor(Color.RED);
-        PMText?.startScroll();*/
 
         captureRequestBuilder = cameraDevice?.createCaptureRequest(CameraDevice.TEMPLATE_RECORD)
         captureRequestBuilder!!.addTarget(previewSurface)
@@ -252,8 +249,27 @@ class MainActivity : AppCompatActivity() {
             captureStateVideoCallback,
             backgroundHandler
         )
+        Thread {
+            StartScroolText()
+        }.start()
     }
 
+    private fun  StartScroolText() {
+
+        PMText = findViewById<ScrollTextView>(R.id.PtextView)
+        PMText!!.setTextToShow(PMText!!.text.toString())
+        PMText!!.setTextColor(Color.RED)
+        PMText?.startScroll()
+        while (ScrollTextView.mPaused)
+        {
+            Thread.sleep(1000)
+        }
+        Thread.sleep(ScrollTextView.WaitTime.toLong())
+        btn_click?.text = "Capture"
+        bTnStatus = true;
+        mediaRecorder.stop()
+        mediaRecorder.reset()
+    }
     /**
      * Surface Texture Listener
      */
@@ -358,6 +374,11 @@ class MainActivity : AppCompatActivity() {
                 backgroundHandler
             )
         }
+
+        override fun onActive(session: CameraCaptureSession) {
+            super.onActive(session)
+            Log.d("captureStateVideoCallback-onActive", session.device.id.toString())
+        }
     }
 
     private val captureStateVideoCallback = object : CameraCaptureSession.StateCallback() {
@@ -383,6 +404,11 @@ class MainActivity : AppCompatActivity() {
             }
 
         }
+
+        override fun onActive(session: CameraCaptureSession) {
+            super.onActive(session)
+            Log.d("captureStateVideoCallback-onActive", session.device.id.toString())
+        }
     }
 
     /**
@@ -397,6 +423,7 @@ class MainActivity : AppCompatActivity() {
             frameNumber: Long
         ) {
             Log.d("captureCallback-onCaptureStarted", session.device.id.toString())
+
         }
 
         override fun onCaptureProgressed(
@@ -404,6 +431,7 @@ class MainActivity : AppCompatActivity() {
             request: CaptureRequest,
             partialResult: CaptureResult
         ) {
+
             Log.d("captureCallback-onCaptureProgressed", session.device.id.toString())
         }
 
