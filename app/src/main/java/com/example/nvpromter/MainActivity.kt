@@ -44,7 +44,6 @@ private  var textureView: TextureView? = null
 private var backgroundHandlerThread: HandlerThread?= null
 private var backgroundHandler: Handler? = null
 private  var cameraManager: CameraManager? = null
-private  var cameraDevice: CameraDevice? = null
 private  var captureRequestBuilder: CaptureRequest.Builder? = null
 private  var cameraCaptureSession: CameraCaptureSession? = null
 private  var imageReader: ImageReader? = null
@@ -64,10 +63,13 @@ var cameraIndex :  Int = 0;
 private var PMText: ScrollTextView? = null;
 
 
+
 class MainActivity : AppCompatActivity() {
     companion object {
         @JvmStatic
         var ScrollTextViewObject: ScrollTextView? = null
+        var cameraDevice: CameraDevice? = null
+
     }
 
 
@@ -86,11 +88,19 @@ class MainActivity : AppCompatActivity() {
             cameraManager = getSystemService(Context.CAMERA_SERVICE) as CameraManager
             cameraCount= cameraManager!!.cameraIdList.size
 
+
+
             val btn_camera = findViewById<Button>(R.id.CameraB)
             // set on-click listener
             btn_camera.setOnClickListener {
 
                 if (cameraIndex == (cameraCount )) cameraIndex = 0;
+                if ( cameraDevice!= null)
+                {
+                    Log.d("DDbtn_camera.setOnClickListener -cameraDevice", cameraDevice!!.id.toString())
+                    cameraDevice!!.close()
+                    cameraDevice = null;
+                }
                 setupCamera()
                 connectCamera()
                 cameraIndex += 1;
@@ -108,7 +118,7 @@ class MainActivity : AppCompatActivity() {
                     btn_click?.text = "Capture"
                     bTnStatus = true;
                     mediaRecorder.stop()
-                    mediaRecorder.reset()
+                  //  mediaRecorder.reset()
                 }
             }
 
@@ -145,6 +155,9 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("MissingPermission")
     override fun onResume() {
         super.onResume()
+        Log.d(
+            "DDonResume-onResume ","onResume"
+        )
         startBackgroundThread()
         if (textureView!!.isAvailable && shouldProceedWithOnResume) {
             setupCamera()
@@ -155,19 +168,20 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupCamera() {
-        Log.d("setupCamera-cameraIndex", cameraIndex.toString())
+        Log.d("DDsetupCamera-cameraIndex", cameraIndex.toString())
         // val cameraIds: Array<String> = cameraManager.cameraIdList
 
         // for (id in cameraIds) {
         if ( surfaceTexture!=null)
         {
-         //   if (!surfaceTexture!!.isReleased ) surfaceTexture!!.release()
+          Log.d("DDsetupCamera-surfaceTexture", "surfaceTexture!=null")
         }
 
         if ( cameraDevice!= null)
         {
-            cameraDevice!!.close()
-            cameraDevice = null;
+            Log.d("DDsetupCamera-cameraDevice", "cameraDevice!=null")
+            //cameraDevice!!.close()
+            //cameraDevice = null;
         }
         cameraCharacteristics = cameraManager?.getCameraCharacteristics(cameraIndex.toString())
 
@@ -210,6 +224,18 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("MissingPermission")
     private fun connectCamera() {
         cameraManager!!.openCamera(cameraIndex.toString(), cameraStateCallback, backgroundHandler)
+        if (cameraDevice!=null) {
+            Log.d(
+                "DDconnectCamera-cameradevice ",
+                cameraDevice!!.id.toString()
+            )
+        }else
+        {
+            Log.d(
+                "DDconnectCamera-cameradevice ",
+                "cameraDevice is null"
+            )
+        }
     }
 
     private fun setupMediaRecorder() {
@@ -234,21 +260,48 @@ class MainActivity : AppCompatActivity() {
 
     private fun startRecording() {
 
-        val surfaceTexture: SurfaceTexture? = textureView!!.surfaceTexture
+        textureView!!.requestFocus()
+        surfaceTexture = textureView!!.surfaceTexture
         surfaceTexture?.setDefaultBufferSize(previewSize!!.width, previewSize!!.height)
-        val previewSurface: Surface = Surface(surfaceTexture)
+        previewSurface = Surface(surfaceTexture!!)
         val recordingSurface = mediaRecorder.surface
 
+        if (cameraDevice != null) {
+            Log.d(
+                "DDstartRecording-cameradevice ",
+                cameraDevice!!.id.toString()
+            )
+            captureRequestBuilder = cameraDevice?.createCaptureRequest(CameraDevice.TEMPLATE_RECORD)
+            captureRequestBuilder!!.addTarget(previewSurface!!)
+            captureRequestBuilder!!.addTarget(recordingSurface)
 
-        captureRequestBuilder = cameraDevice?.createCaptureRequest(CameraDevice.TEMPLATE_RECORD)
-        captureRequestBuilder!!.addTarget(previewSurface)
-        captureRequestBuilder!!.addTarget(recordingSurface)
+            cameraDevice!!.createCaptureSession(
+                listOf(previewSurface, recordingSurface),
+                captureStateVideoCallback,
+                backgroundHandler
+            )
+        } else {
+            Log.d(
+                "DDstartRecording-cameradevice ",
+                "cameraDevice is null"
+            )
+            setupCamera()
+            connectCamera()
+            if (cameraDevice != null) {
+                Log.d(
+                    "DDstartRecording-cameradevice ",
+                    cameraDevice!!.id.toString()
+                )
+                captureRequestBuilder = cameraDevice?.createCaptureRequest(CameraDevice.TEMPLATE_RECORD)
+                captureRequestBuilder!!.addTarget(previewSurface!!)
+                captureRequestBuilder!!.addTarget(recordingSurface)
 
-        cameraDevice!!.createCaptureSession(
-            listOf(previewSurface, recordingSurface),
-            captureStateVideoCallback,
-            backgroundHandler
-        )
+                cameraDevice!!.createCaptureSession(
+                    listOf(previewSurface, recordingSurface),
+                    captureStateVideoCallback,
+                    backgroundHandler
+                )}
+        }
         Thread {
             StartScroolText()
         }.start()
@@ -260,15 +313,17 @@ class MainActivity : AppCompatActivity() {
         PMText!!.setTextToShow(PMText!!.text.toString())
         PMText!!.setTextColor(Color.RED)
         PMText?.startScroll()
-        while (ScrollTextView.mPaused)
-        {
+        while (PMText!!.isEndScrolling()) {
             Thread.sleep(1000)
         }
         Thread.sleep(ScrollTextView.WaitTime.toLong())
         btn_click?.text = "Capture"
         bTnStatus = true;
-        mediaRecorder.stop()
-        mediaRecorder.reset()
+        if (mediaRecorder != null) {
+            mediaRecorder.stop()
+            mediaRecorder.reset()
+        }
+
     }
     /**
      * Surface Texture Listener
@@ -280,21 +335,33 @@ class MainActivity : AppCompatActivity() {
             if (wasCameraPermissionWasGiven()) {
                 setupCamera()
                 connectCamera()
-                if (cameraIndex == (cameraCount + 1)) cameraIndex = 0;
-                cameraIndex++
+
             }
+            Log.d("DDsurfaceTextureListener-onSurfaceTextureAvailable",texture.toString())
         }
 
         override fun onSurfaceTextureSizeChanged(texture: SurfaceTexture, width: Int, height: Int) {
-
+            Log.d("DDsurfaceTextureListener-onSurfaceTextureSizeChanged",texture.toString())
         }
 
         override fun onSurfaceTextureDestroyed(texture: SurfaceTexture): Boolean {
+            Log.d("DDsurfaceTextureListener-onSurfaceTextureDestroyed",texture.toString())
             return true
         }
 
         override fun onSurfaceTextureUpdated(texture: SurfaceTexture) {
-
+           // Log.d("DDsurfaceTextureListener-onSurfaceTextureUpdated",texture.toString())
+            if (cameraDevice!=null) {
+           /*     Log.d(
+                    "DDsurfaceTextureListener-onSurfaceTextureUpdated-cameradevice ",
+                    cameraDevice!!.id.toString()
+                )*/
+            }
+            else{
+                Log.d(
+                    "DDsurfaceTextureListener-onSurfaceTextureUpdated-cameradevice ",
+                    "cameDevice is null")
+            }
         }
     }
 
@@ -304,7 +371,7 @@ class MainActivity : AppCompatActivity() {
 
     private val cameraStateCallback = object : CameraDevice.StateCallback() {
         override fun onOpened(camera: CameraDevice) {
-            Log.d("cameraStateCallback-onOpened",camera.id.toString() )
+            Log.d("DDcameraStateCallback-onOpened",camera.id.toString() )
             cameraDevice = camera
             surfaceTexture = textureView!!.surfaceTexture
             surfaceTexture?.setDefaultBufferSize(previewSize!!.width, previewSize!!.height)
@@ -316,12 +383,12 @@ class MainActivity : AppCompatActivity() {
         }
 
         override fun onDisconnected(cameraDevice: CameraDevice) {
-            Log.d("cameraStateCallback-onDisconnected",cameraDevice.id.toString() )
+            Log.d("DDcameraStateCallback-onDisconnected",cameraDevice.id.toString() )
         }
 
         override fun onClosed(camera: CameraDevice) {
             super.onClosed(camera)
-            Log.d("cameraStateCallback-onClosed",camera.id.toString() )
+            Log.d("DDcameraStateCallback-onClosed",camera.id.toString() )
         }
 
         override fun onError(cameraDevice: CameraDevice, error: Int) {
@@ -334,7 +401,7 @@ class MainActivity : AppCompatActivity() {
                 else -> "Unknown"
             }
             Log.e(TAG, "Error when trying to connect camera $errorMsg")
-            Log.d("cameraStateCallback-onError", "Error when trying to connect camera $errorMsg " + cameraDevice.id.toString())
+            Log.d("DDcameraStateCallback-onError", "Error when trying to connect camera $errorMsg " + cameraDevice.id.toString())
         }
     }
 
@@ -342,7 +409,7 @@ class MainActivity : AppCompatActivity() {
      * Background Thread
      */
     private fun startBackgroundThread() {
-        Log.d("startBackgroundThread-cameraIndex",cameraIndex.toString())
+        Log.d("DDstartBackgroundThread-cameraIndex",cameraIndex.toString())
         runningBackgroundThread = true;
         backgroundHandlerThread = HandlerThread("CameraVideoThread")
         backgroundHandlerThread!!.start()
@@ -350,7 +417,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun stopBackgroundThread() {
-        Log.d("stopBackgroundThread-cameraIndex",cameraIndex.toString())
+        Log.d("DDstopBackgroundThread-cameraIndex",cameraIndex.toString())
         runningBackgroundThread = false
         backgroundHandlerThread!!.quitSafely()
         backgroundHandlerThread!!.join()
@@ -362,10 +429,10 @@ class MainActivity : AppCompatActivity() {
 
     private val captureStateCallback = object : CameraCaptureSession.StateCallback() {
         override fun onConfigureFailed(session: CameraCaptureSession) {
-            Log.d("captureStateCallback-onConfigureFailed", session.device.id.toString())
+            Log.d("DDcaptureStateCallback-onConfigureFailed", session.device.id.toString())
         }
         override fun onConfigured(session: CameraCaptureSession) {
-            Log.d("captureStateCallback-onConfigured", session.device.id.toString())
+            Log.d("DDcaptureStateCallback-onConfigured", session.device.id.toString())
             cameraCaptureSession = session
 
             cameraCaptureSession!!.setRepeatingRequest(
@@ -377,17 +444,17 @@ class MainActivity : AppCompatActivity() {
 
         override fun onActive(session: CameraCaptureSession) {
             super.onActive(session)
-            Log.d("captureStateVideoCallback-onActive", session.device.id.toString())
+            Log.d("DDcaptureStateVideoCallback-onActive", session.device.id.toString())
         }
     }
 
     private val captureStateVideoCallback = object : CameraCaptureSession.StateCallback() {
         override fun onConfigureFailed(session: CameraCaptureSession) {
-            Log.d("captureStateVideoCallback-onConfigureFailed", session.device.id.toString())
+            Log.d("DDcaptureStateVideoCallback-onConfigureFailed", session.device.id.toString())
             Log.e(TAG, "Configuration failed")
         }
         override fun onConfigured(session: CameraCaptureSession) {
-            Log.d("captureStateVideoCallback-onConfigured", session.device.id.toString())
+            Log.d("DDcaptureStateVideoCallback-onConfigured", session.device.id.toString())
             cameraCaptureSession = session
             captureRequestBuilder?.set(CaptureRequest.CONTROL_AF_MODE, CaptureResult.CONTROL_AF_MODE_CONTINUOUS_VIDEO)
             try {
@@ -407,7 +474,7 @@ class MainActivity : AppCompatActivity() {
 
         override fun onActive(session: CameraCaptureSession) {
             super.onActive(session)
-            Log.d("captureStateVideoCallback-onActive", session.device.id.toString())
+            Log.d("DDcaptureStateVideoCallback-onActive", session.device.id.toString())
         }
     }
 
@@ -422,7 +489,7 @@ class MainActivity : AppCompatActivity() {
             timestamp: Long,
             frameNumber: Long
         ) {
-            Log.d("captureCallback-onCaptureStarted", session.device.id.toString())
+            Log.d("DDcaptureCallback-onCaptureStarted", session.device.id.toString())
 
         }
 
@@ -432,7 +499,7 @@ class MainActivity : AppCompatActivity() {
             partialResult: CaptureResult
         ) {
 
-            Log.d("captureCallback-onCaptureProgressed", session.device.id.toString())
+            Log.d("DDcaptureCallback-onCaptureProgressed", session.device.id.toString())
         }
 
         override fun onCaptureCompleted(
@@ -468,7 +535,7 @@ class MainActivity : AppCompatActivity() {
         mediaStorageDir.apply {
             if (!exists()) {
                 if (!mkdirs()) {
-                    Log.d("MyCameraApp", "failed to create directory")
+                    Log.d("DDcreateFile", "failed to create directory")
                     return null
                 }
             }

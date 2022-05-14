@@ -58,8 +58,8 @@
 
     <com.example.nvpromter.ScrollTextView
         android:id="@+id/PvtextView"
-        android:layout_width="match_parent"
-        android:layout_height="32dp"
+        android:layout_width="373dp"
+        android:layout_height="31dp"
         android:layout_marginTop="32dp"
         android:scrollHorizontally="true"
         android:singleLine="true"
@@ -67,10 +67,10 @@
         android:textSize="24sp"
         app:layout_constraintBottom_toTopOf="@+id/TextPad"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_bias="0.578"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/Pbutton"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintVertical_bias="0.09" />
 
     <Button
         android:id="@+id/Pbutton"
@@ -100,7 +100,7 @@
         android:layout_width="91dp"
         android:layout_height="40dp"
         android:ems="10"
-        android:text="250"
+        android:text="150"
         android:textSize="10sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -133,8 +133,8 @@
 
     <EditText
         android:id="@+id/TextPad"
-        android:layout_width="382dp"
-        android:layout_height="344dp"
+        android:layout_width="345dp"
+        android:layout_height="334dp"
         android:gravity="start"
         android:isScrollContainer="true"
         android:layoutDirection="ltr"
