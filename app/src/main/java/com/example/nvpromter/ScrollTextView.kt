@@ -105,7 +105,7 @@ class ScrollTextView   : androidx.appcompat.widget.AppCompatTextView {
             Log.d("startScroll-LineIndex", LineIndex.toString())
             val needsScrolling: Boolean = checkIfNeedsScrolling(TextList[LineIndex].toString())
             // begin from the middle
-            mXPaused = -10
+            mXPaused = -1 * (width/4)
             // assume it's paused
             mPaused = true
             resumeScroll()
@@ -165,13 +165,11 @@ class ScrollTextView   : androidx.appcompat.widget.AppCompatTextView {
         setScroller(mSlr)
         val scrollingLen = calculateScrollingLen(TextList[LineIndex].toString())
         var distance : Int = 0;
-        if (width < mXPaused)
-        {distance = scrollingLen - (width -mXPaused)}
-        else{distance = scrollingLen - (width + mXPaused)}
+        distance = scrollingLen - (width + mXPaused)
 
         Log.d("resumeScroll-distance",distance.toString())
         //check distance for next line
-        val duration = (5000f * distance / mScrollSpeed).toInt()
+        val duration = (3000f * distance / mScrollSpeed).toInt()
         visibility = VISIBLE
         Log.d("resumeScroll-TextList[mXPaused",mXPaused.toString())
         mSlr!!.startScroll(mXPaused, 0, distance, 0, duration)

@@ -60,17 +60,14 @@
         android:id="@+id/PvtextView"
         android:layout_width="373dp"
         android:layout_height="31dp"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="44dp"
         android:scrollHorizontally="true"
         android:singleLine="true"
         android:textDirection="ltr"
         android:textSize="24sp"
-        app:layout_constraintBottom_toTopOf="@+id/TextPad"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.578"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/Pbutton"
-        app:layout_constraintVertical_bias="0.09" />
+        app:layout_constraintTop_toBottomOf="@+id/Pbutton" />
 
     <Button
         android:id="@+id/Pbutton"
@@ -144,10 +141,9 @@
         android:textSize="12sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.461"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.98" />
+        app:layout_constraintTop_toBottomOf="@+id/PvtextView"
+        app:layout_constraintVertical_bias="0.804" />
 
     <TextView
         android:id="@+id/textView2"
