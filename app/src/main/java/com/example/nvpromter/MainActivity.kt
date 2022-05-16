@@ -14,7 +14,11 @@ import android.icu.text.SimpleDateFormat
 import android.media.Image
 import android.media.ImageReader
 import android.media.MediaRecorder
-import android.os.*
+import android.os.Bundle
+import android.os.Environment
+import android.os.Handler
+import android.os.HandlerThread
+import android.util.DisplayMetrics
 import android.util.Log
 import android.util.Size
 import android.util.SparseIntArray
@@ -25,10 +29,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.util.*
-import kotlin.concurrent.thread
 
 
 const val CAMERA_REQUEST_RESULT = 101
@@ -83,8 +85,9 @@ class MainActivity : AppCompatActivity() {
             setContentView(R.layout.activity_main)
             makeRequest();
 
-
+            PMText = findViewById<ScrollTextView>(R.id.PtextView)
             textureView = findViewById<TextureView>(R.id.tVcamera_preview)
+            setCameraPrivewSize()
             cameraManager = getSystemService(Context.CAMERA_SERVICE) as CameraManager
             cameraCount= cameraManager!!.cameraIdList.size
 
@@ -126,6 +129,7 @@ class MainActivity : AppCompatActivity() {
             val btn_click_set_text = findViewById(R.id.SetText) as Button
             // set on-click listener
             btn_click_set_text.setOnClickListener {
+                PMText!!.text=""
                 val intent = Intent(this, SetTextActivity::class.java).apply {
                     //putExtra(EXTRA_MESSAGE, message)
                 }
@@ -137,7 +141,29 @@ class MainActivity : AppCompatActivity() {
         }
 
 
+    private fun setCameraPrivewSize()
+    {
+        var width: Double = this.resources.displayMetrics.widthPixels.toDouble()
+        var height: Double = this.resources.displayMetrics.heightPixels.toDouble()
+        if (width>convertDpToPixel(textureView!!.width.toFloat(),this))
+        {
+            width =  convertDpToPixel(400F,this).toDouble()
+            height = convertDpToPixel(600F,this).toDouble()
+        }
+        else
+        {
+            height = width*1.5
+        }
+        textureView!!.layoutParams.height = height.toInt()
+        textureView!!.layoutParams.width = width.toInt()
+    }
 
+    fun convertDpToPixel(dp: Float, context: Context): Float {
+        return dp * (context.resources.displayMetrics.densityDpi.toFloat() / DisplayMetrics.DENSITY_DEFAULT)
+    }
+    fun convertPixelsToDp(px: Float, context: Context): Float {
+        return px / (context.resources.displayMetrics.densityDpi.toFloat() / DisplayMetrics.DENSITY_DEFAULT)
+    }
     private fun makeRequest() {
 
         ActivityCompat.requestPermissions(
@@ -309,7 +335,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun  StartScroolText() {
 
-        PMText = findViewById<ScrollTextView>(R.id.PtextView)
+
         PMText!!.setTextToShow(PMText!!.text.toString())
         PMText!!.setTextColor(Color.RED)
         PMText?.startScroll()
