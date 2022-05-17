@@ -46,7 +46,6 @@ class SetTextActivity : AppCompatActivity() {
             {
                 btn_click.text="Preview"
                 bTnStatus = true;
-                PText!!.pauseScroll();
                 PText=null
             }
         }
@@ -57,10 +56,10 @@ class SetTextActivity : AppCompatActivity() {
         btn_close.setOnClickListener {
 
             PText!!.setTextToShow(TextToshow?.text.toString())
-            PText!!.setSpeed(TextSpeed?.text.toString().toFloat())
-            PText!!.setTimeBTLines(TextTospeedbtl?.text.toString().toInt()*1000)
-            PText!!.setPauseStartTime(TextTostartaftertime?.text.toString().toInt()*1000)
-            ScrollTextView.WaitTime =  TextTostopCapture?.text.toString().toInt()*1000
+            PText!!.setSpeed(TextSpeed?.text.toString().toInt())
+            PText!!.setTimeBTLines(TextTospeedbtl?.text.toString().toInt())
+            PText!!.setPauseStartTime(TextTostartaftertime?.text.toString().toInt())
+            ScrollTextView.WaitTime =  TextTostopCapture?.text.toString().toInt()
             PText!!.setTextColor(Color.RED);
             MainActivity.ScrollTextViewObject = PText
             finish();
@@ -86,10 +85,10 @@ class SetTextActivity : AppCompatActivity() {
         hideKeyboard()
 
         PText!!.setTextToShow(TextToshow?.text.toString())
-        PText!!.setSpeed(TextSpeed?.text.toString().toFloat())
-        PText!!.setTimeBTLines(TextTospeedbtl?.text.toString().toInt()*1000)
-        PText!!.setPauseStartTime(TextTostartaftertime?.text.toString().toInt()*1000)
-        ScrollTextView.WaitTime =  TextTostopCapture?.text.toString().toInt()*1000
+        PText!!.setSpeed(TextSpeed?.text.toString().toInt())
+        PText!!.setTimeBTLines(TextTospeedbtl?.text.toString().toInt())
+        PText!!.setPauseStartTime(TextTostartaftertime?.text.toString().toInt())
+        ScrollTextView.WaitTime =  TextTostopCapture?.text.toString().toInt()
         PText!!.setTextColor(Color.RED);
         PText?.startScroll();
     }
