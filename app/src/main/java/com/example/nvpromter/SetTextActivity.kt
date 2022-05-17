@@ -13,11 +13,12 @@ import androidx.fragment.app.Fragment
 
 private var bTnStatus :Boolean = true;
 private var PText: ScrollTextView? = null;
-var TextToshow : TextView?=null
-var TextSpeed: TextView?=null
-var TextTospeedbtl: TextView?=null
-var TextTostartaftertime: TextView?=null
-var TextTostopCapture: TextView?=null
+private var TextToshow : TextView?=null
+private var TextSpeed: TextView?=null
+private var TextTospeedbtl: TextView?=null
+private var TextTostartaftertime: TextView?=null
+private var TextTostopCapture: TextView?=null
+private var  btn_click : Button? = null
 
 class SetTextActivity : AppCompatActivity() {
 
@@ -32,21 +33,35 @@ class SetTextActivity : AppCompatActivity() {
         TextTostartaftertime = findViewById<TextView>(R.id.TextSetStartTime)
         TextTostopCapture = findViewById<TextView>(R.id.TextSetSTopCapture)
         PText = findViewById<ScrollTextView>(R.id.PvtextView)
+
+
+        PText!!.setCustomObjectListener( object : ScrollTextView.MyScrollTextViewListener {
+            override fun onFinishScroll(status: Boolean?)
+            {
+                if (status == true) {
+                    btn_click!!.text = "Preview"
+                    bTnStatus = true;
+                }
+            }
+
+        })
+
+
         // get reference to button
-        val btn_click = findViewById<Button>(R.id.Pbutton)
+        btn_click = findViewById<Button>(R.id.Pbutton)
         // set on-click listener
-        btn_click.setOnClickListener {
+        btn_click?.setOnClickListener {
             if (bTnStatus)
             {
-                btn_click.text="Stop"
+                btn_click!!.text="Stop"
                 bTnStatus = false;
                 StartPriview()
             }
             else
             {
-                btn_click.text="Preview"
+                btn_click!!.text="Preview"
                 bTnStatus = true;
-                PText=null
+                //PText=null
             }
         }
 
@@ -56,6 +71,7 @@ class SetTextActivity : AppCompatActivity() {
         btn_close.setOnClickListener {
 
             PText!!.setTextToShow(TextToshow?.text.toString())
+            ScrollTextView.TextToShow = TextToshow?.text.toString();
             PText!!.setSpeed(TextSpeed?.text.toString().toInt())
             PText!!.setTimeBTLines(TextTospeedbtl?.text.toString().toInt())
             PText!!.setPauseStartTime(TextTostartaftertime?.text.toString().toInt())
@@ -91,6 +107,7 @@ class SetTextActivity : AppCompatActivity() {
         ScrollTextView.WaitTime =  TextTostopCapture?.text.toString().toInt()
         PText!!.setTextColor(Color.RED);
         PText?.startScroll();
+
     }
 
 

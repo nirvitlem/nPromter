@@ -86,6 +86,21 @@ class MainActivity : AppCompatActivity() {
             makeRequest();
 
             PMText = findViewById<ScrollTextView>(R.id.PtextView)
+            PMText!!.setCustomObjectListener( object : ScrollTextView.MyScrollTextViewListener {
+                override fun onFinishScroll(status: Boolean?)
+                {
+                     if (status == true) {
+                           btn_click?.text = "Capture"
+                           bTnStatus = true;
+                           if (mediaRecorder != null) {
+                               mediaRecorder.stop()
+                               mediaRecorder.reset()
+                           }
+                       }
+                   }
+
+            })
+
             textureView = findViewById<TextureView>(R.id.tVcamera_preview)
             setCameraPrivewSize()
             cameraManager = getSystemService(Context.CAMERA_SERVICE) as CameraManager
@@ -336,19 +351,9 @@ class MainActivity : AppCompatActivity() {
     private fun  StartScroolText() {
 
 
-        PMText!!.setTextToShow(PMText!!.text.toString())
+        PMText!!.setTextToShow(ScrollTextView.TextToShow)
         PMText!!.setTextColor(Color.RED)
         PMText?.startScroll()
-        while (PMText!!.isEndScrolling()) {
-            Thread.sleep(1000)
-        }
-        Thread.sleep(ScrollTextView.WaitTime.toLong())
-        btn_click?.text = "Capture"
-        bTnStatus = true;
-        if (mediaRecorder != null) {
-            mediaRecorder.stop()
-            mediaRecorder.reset()
-        }
 
     }
     /**

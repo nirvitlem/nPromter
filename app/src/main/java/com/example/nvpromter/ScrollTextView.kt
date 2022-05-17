@@ -11,10 +11,22 @@ import android.widget.Scroller
 
 
 class ScrollTextView   : androidx.appcompat.widget.AppCompatTextView {
+
+    interface MyScrollTextViewListener {
+        fun onFinishScroll(status: Boolean?)
+    }
+
+    var listener: MyScrollTextViewListener? = null;
+
+    fun setCustomObjectListener(listener: MyScrollTextViewListener?) {
+        this.listener = listener
+    }
+
     companion object {
         @JvmStatic
         var WaitTime : Int= 5
         var endScroll : Boolean= false
+        var TextToShow : String =""
     }
 
     constructor (context: Context) :super(context)
@@ -91,19 +103,20 @@ class ScrollTextView   : androidx.appcompat.widget.AppCompatTextView {
 
     fun startScroll() {
         try {
-
-            var textWidth: Float = this.getPaint().measureText(" ")
+            endScroll=false
+            var textWidth: Float = this.getPaint().measureText("M")
             var howMnayCharfortextwidth: Float = this.measuredWidth / textWidth
             var stringforLine: String = "";
             var StringForStart : String = "";
             var StringForEnd : String = "";
             var HowManyLines : Int = this.text.toString().split("\n").size
             for (i in 0 until howMnayCharfortextwidth.toInt()) {
-                stringforLine = "$stringforLine "
+                stringforLine += " "
             }
             for (i in 0 until WaitTime.toInt()) {
                 StringForStart += stringforLine
             }
+            StringForEnd+= stringforLine
             for (i in 0 until BTLTime.toInt()) {
                 StringForEnd += stringforLine
             }
@@ -164,7 +177,10 @@ class ScrollTextView   : androidx.appcompat.widget.AppCompatTextView {
         return length + width
     }
 
+    override fun onScrollChanged(x: Int, y: Int, oldX: Int, oldY: Int) {
 
+        super.onScrollChanged(x, y, oldX, oldY)
+    }
 
     private fun getTextLength(Line:String): Int {
         val tp: TextPaint = paint
@@ -183,6 +199,14 @@ class ScrollTextView   : androidx.appcompat.widget.AppCompatTextView {
  */   override fun computeScroll() {
         super.computeScroll()
         if (null == mSlr) return
+        if (mSlr!!.isFinished && endScroll==false )
+        {
+            endScroll = true
+            if (listener != null)  listener!!.onFinishScroll(true)
+
+            Log.d("computeScroll mSlr!!.isFinished",endScroll.toString())
+
+        }
 
     }
 
