@@ -79,6 +79,14 @@ class MainActivity : AppCompatActivity() {
     private lateinit var mediaRecorder: MediaRecorder
     private var isRecording: Boolean = false
 
+    override fun onResumeFragments() {
+        super.onResumeFragments()
+        if (ScrollTextViewObject!=null)
+        {
+            PMText?.text= ScrollTextViewObject!!.text
+            PMText!!.invalidate()
+        }
+    }
 
         override fun onCreate(savedInstanceState: Bundle?) {
             super.onCreate(savedInstanceState)
@@ -86,6 +94,7 @@ class MainActivity : AppCompatActivity() {
             makeRequest();
 
             PMText = findViewById<ScrollTextView>(R.id.PtextView)
+
             PMText!!.setCustomObjectListener( object : ScrollTextView.MyScrollTextViewListener {
                 override fun onFinishScroll(status: Boolean?)
                 {
@@ -144,11 +153,13 @@ class MainActivity : AppCompatActivity() {
             val btn_click_set_text = findViewById(R.id.SetText) as Button
             // set on-click listener
             btn_click_set_text.setOnClickListener {
-                PMText!!.text=""
+
                 val intent = Intent(this, SetTextActivity::class.java).apply {
                     //putExtra(EXTRA_MESSAGE, message)
                 }
+                SetTextActivity.texttoshow= PMText!!.text.toString()
                 startActivity(intent)
+                //PMText!!.text=""
             }
             if (!wasCameraPermissionWasGiven()) {
                requestPermissions(arrayOf(Manifest.permission.CAMERA), CAMERA_REQUEST_RESULT)
@@ -618,5 +629,4 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
 }

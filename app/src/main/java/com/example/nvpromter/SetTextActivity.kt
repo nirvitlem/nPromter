@@ -23,11 +23,16 @@ private var  btn_click : Button? = null
 class SetTextActivity : AppCompatActivity() {
 
 
+    companion object {
+        @JvmStatic
+        var texttoshow : String =""
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_set_text)
 
         TextToshow = findViewById<TextView>(R.id.TextPad)
+        TextToshow?.text = texttoshow?.toString()
         TextSpeed = findViewById<TextView>(R.id.textSetSpeed)
         TextTospeedbtl = findViewById<TextView>(R.id.textSetTimeBetweenLines)
         TextTostartaftertime = findViewById<TextView>(R.id.TextSetStartTime)

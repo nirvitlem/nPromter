@@ -55,7 +55,7 @@
         android:layout_width="match_parent"
         android:layout_height="32dp"
         android:singleLine="true"
-        android:text="This is Default Text   This is Default Text   This is Default Text   This is Default Text   This is Default Text   This is Default Text   This is Default Text   This is Default Text "
+        android:text="  This is Default Text   This is Default Text "
         android:textDirection="ltr"
         android:textSize="24sp"
         android:textStyle="bold"
