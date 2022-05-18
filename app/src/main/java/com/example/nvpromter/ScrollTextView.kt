@@ -24,7 +24,7 @@ class ScrollTextView   : androidx.appcompat.widget.AppCompatTextView {
 
     companion object {
         @JvmStatic
-        var WaitTime : Int= 8
+        var WaitTime : Int= 15
         var endScroll : Boolean= false
         var TextToShow : String =""
     }
