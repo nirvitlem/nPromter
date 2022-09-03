@@ -363,6 +363,10 @@ class MainActivity : AppCompatActivity() {
 
         PMText!!.setTextToShow(ScrollTextView.TextToShow)
         PMText!!.setTextColor(Color.RED)
+        if (ScrollTextViewObject!=null)
+        {
+            PMText?.mScrollSpeed= ScrollTextViewObject!!.mScrollSpeed
+        }
         PMText?.startScroll()
 
     }

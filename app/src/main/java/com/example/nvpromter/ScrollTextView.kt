@@ -69,7 +69,7 @@ class ScrollTextView   : androidx.appcompat.widget.AppCompatTextView {
 
 
 
-    private var mScrollSpeed = 5 //Added speed for same scrolling speed regardless of text
+    var mScrollSpeed = 15 //Added speed for same scrolling speed regardless of text
     private var BTLTime :Int = 2
 
 

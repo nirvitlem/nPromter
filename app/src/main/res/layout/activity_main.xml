@@ -53,11 +53,11 @@
     <com.example.nvpromter.ScrollTextView
         android:id="@+id/PtextView"
         android:layout_width="match_parent"
-        android:layout_height="32dp"
+        android:layout_height="34dp"
         android:singleLine="true"
         android:text="  This is Default Text   This is Default Text "
         android:textDirection="ltr"
-        android:textSize="24sp"
+        android:textSize="25dp"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@+id/guideline5"
         app:layout_constraintEnd_toEndOf="parent"

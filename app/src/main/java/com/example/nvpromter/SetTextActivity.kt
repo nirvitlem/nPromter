@@ -83,6 +83,7 @@ class SetTextActivity : AppCompatActivity() {
             ScrollTextView.WaitTime =  TextTostopCapture?.text.toString().toInt()
             PText!!.setTextColor(Color.RED);
             MainActivity.ScrollTextViewObject = PText
+            MainActivity.ScrollTextViewObject!!.mScrollSpeed = PText!!.mScrollSpeed
             finish();
         }
     }
