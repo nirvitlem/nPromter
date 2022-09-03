@@ -367,7 +367,7 @@ class MainActivity : AppCompatActivity() {
         {
             PMText?.mScrollSpeed= ScrollTextViewObject!!.mScrollSpeed
         }
-        PMText?.startScroll()
+         PMText?.startScroll()
 
     }
     /**
