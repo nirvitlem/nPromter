@@ -6,6 +6,8 @@
         <entry key="..\:/Users/Nir/AndroidStudioProjects/nvpromter/app/src/main/res/layout/activity_main.xml" value="0.67" />
         <entry key="..\:/Users/Nir/AndroidStudioProjects/nvpromter/app/src/main/res/layout/activity_set_text.xml" value="0.5" />
         <entry key="..\:/Users/Nir/AndroidStudioProjects/nvpromter/app/src/main/res/layout/activity_set_text2.xml" value="0.16945288753799392" />
+        <entry key="..\:/Users/NirV/StudioProjects/nPromter/app/src/main/res/layout/activity_main.xml" value="0.358695652173913" />
+        <entry key="..\:/Users/NirV/StudioProjects/nPromter/app/src/main/res/layout/activity_set_text.xml" value="0.358695652173913" />
         <entry key="..\:/Users/nirv/AndroidStudioProjects/nPromter/app/src/main/res/layout/activity_main.xml" value="0.18802083333333333" />
         <entry key="..\:/Users/nirv/AndroidStudioProjects/nPromter/app/src/main/res/layout/activity_set_text.xml" value="0.358695652173913" />
         <entry key="..\:/Users/nirv/StudioProjects/nPromter/app/src/main/res/layout/activity_main.xml" value="0.18802083333333333" />
@@ -13,7 +15,7 @@
       </map>
     </option>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="JDK" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="11" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/build/classes" />
   </component>
   <component name="ProjectType">

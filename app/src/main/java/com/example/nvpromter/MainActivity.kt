@@ -21,6 +21,7 @@ import android.util.Size
 import android.util.SparseIntArray
 import android.view.Surface
 import android.view.TextureView
+import android.view.View
 import android.widget.Button
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -162,6 +163,20 @@ class MainActivity : AppCompatActivity() {
             }
             if (!wasCameraPermissionWasGiven()) {
                requestPermissions(arrayOf(Manifest.permission.CAMERA), CAMERA_REQUEST_RESULT)
+            }
+
+            val fabinc: View = findViewById(R.id.fabInc)
+            val fabdec: View = findViewById(R.id.fabDec)
+            fabinc.setOnClickListener {
+               // PMText!!.height =+1
+                PMText!!.textSize =+1.0f
+                PMText!!.invalidate();
+            }
+
+            fabdec.setOnClickListener {
+             //   PMText!!.height =-1
+                PMText!!.textSize =-1.0f
+                PMText!!.invalidate();
             }
         }
 
