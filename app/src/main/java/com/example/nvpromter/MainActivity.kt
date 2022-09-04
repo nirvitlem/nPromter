@@ -15,10 +15,7 @@ import android.media.Image
 import android.media.ImageReader
 import android.media.MediaRecorder
 import android.os.*
-import android.util.DisplayMetrics
-import android.util.Log
-import android.util.Size
-import android.util.SparseIntArray
+import android.util.*
 import android.view.Surface
 import android.view.TextureView
 import android.view.View
@@ -52,6 +49,8 @@ private  var previewSize: Size? = null
 private  var videoSize: Size? = null
 private var shouldProceedWithOnResume: Boolean = true
 private var CameraFront : Boolean = false
+private var TSize : Float = 25F
+private var Thigh : Int = 35
 private var orientations : SparseIntArray = SparseIntArray(4).apply {
     append(Surface.ROTATION_0, 0)
     append(Surface.ROTATION_90, 90)
@@ -168,14 +167,18 @@ class MainActivity : AppCompatActivity() {
             val fabinc: View = findViewById(R.id.fabInc)
             val fabdec: View = findViewById(R.id.fabDec)
             fabinc.setOnClickListener {
-               // PMText!!.height =+1
-                PMText!!.textSize =+1.0f
+                TSize += 1f
+                Thigh +=1
+                PMText!!.height = Thigh;
+                PMText!!.setTextSize(TypedValue.COMPLEX_UNIT_DIP,TSize );
                 PMText!!.invalidate();
             }
 
             fabdec.setOnClickListener {
-             //   PMText!!.height =-1
-                PMText!!.textSize =-1.0f
+                TSize -= 1f
+                Thigh -= 1
+                PMText!!.height = Thigh;
+                PMText!!.setTextSize(TypedValue.COMPLEX_UNIT_DIP, TSize);
                 PMText!!.invalidate();
             }
         }

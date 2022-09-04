@@ -66,8 +66,8 @@
 
     <com.example.nvpromter.ScrollTextView
         android:id="@+id/PtextView"
-        android:layout_width="match_parent"
-        android:layout_height="34dp"
+        android:layout_width="412dp"
+        android:layout_height="50dp"
         android:singleLine="true"
         android:text="  This is Default Text   This is Default Text "
         android:textDirection="ltr"
